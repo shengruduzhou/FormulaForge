@@ -1,57 +1,107 @@
-import type { FormulaType } from "../../schemas/formula";
+import type { FormulaFeatureSet, FormulaType } from "../../schemas/formula";
+import { extractFormulaFeatures } from "./extractFormulaFeatures";
 import { normalizeLatex } from "./normalizeLatex";
 
-function score(patterns: RegExp[], value: string): number {
-  return patterns.reduce((total, pattern) => total + (pattern.test(value) ? 1 : 0), 0);
+function addScore(scores: Record<FormulaType, number>, type: FormulaType, amount: number) {
+  scores[type] += amount;
+}
+
+function has(value: string, pattern: RegExp): boolean {
+  pattern.lastIndex = 0;
+  return pattern.test(value);
 }
 
 export interface FormulaDetectionResult {
   type: FormulaType;
   confidence: number;
   scores: Record<FormulaType, number>;
+  features: FormulaFeatureSet;
 }
 
 export function detectFormulaTypeWithConfidence(latex: string, context = ""): FormulaDetectionResult {
-  const value = `${normalizeLatex(latex)} ${context}`.toLowerCase();
+  const normalized = normalizeLatex(latex);
+  const value = `${normalized} ${context}`.toLowerCase();
+  const compact = value.replace(/\s+/g, "");
+  const features = extractFormulaFeatures(normalized);
 
   const scores: Record<FormulaType, number> = {
-    weighted_loss: score(
-      [/\\lambda|\\alpha|\\beta|\\gamma/, /\+/, /l_\{|loss|objective|j\(/, /=/],
-      value,
-    ),
-    softmax: score([/\\frac/, /e\^|\\exp/, /\\sum/, /z_|logit|p_/], value),
-    sigmoid: score([/\\sigma|sigmoid/, /1\s*\+/, /e\^\{-?x|e\^-x|\\exp\(-?x/], value),
-    gradient_descent: score([/\\theta_\{t\+1\}/, /\\theta_t/, /\\eta/, /\\nabla|gradient/], value),
-    cross_entropy: score([/cross.?entropy|entropy/, /\\log|log/, /y_|p_|\\hat\{?y/, /-\\sum|- ?\\sum/], value),
-    bayes_rule: score([/p\s*\(|probability|posterior|prior|likelihood/, /\\frac/, /p\s*\(.+\|.+\)/, /bayes/], value),
-    combination: score([/\\binom|c_\{|\\choose/, /n/, /k/, /factorial|!/], value),
-    set_identity: score([/\\cup|\\cap|\\setminus|\\in|\\subset|\\overline/, /\|.*\||cardinality|set|union|intersection/, /=|\+|-/, /a|b/], value),
-    graph_degree: score([/g\s*=\s*\\?\(?v,?\s*e\\?\)?|graph|vertex|edge/, /deg|degree|\\sum/, /v|e/, /=/], value),
+    weighted_loss: 0,
+    softmax: 0,
+    sigmoid: 0,
+    gradient_descent: 0,
+    cross_entropy: 0,
+    bayes_rule: 0,
+    combination: 0,
+    permutation: 0,
+    set_identity: 0,
+    graph_degree: 0,
+    logic_quantifier: 0,
+    recurrence_relation: 0,
     unknown: 0,
   };
 
-  if (/softmax/.test(value)) scores.softmax += 3;
-  if (/sigmoid/.test(value)) scores.sigmoid += 3;
-  if (/\\sigma/.test(value)) scores.sigmoid += 2;
-  if (/gradient descent|update rule|learning rate/.test(value)) scores.gradient_descent += 2;
-  if (/weighted|multi-objective|loss function/.test(value)) scores.weighted_loss += 2;
-  if (/cross entropy|negative log likelihood|classification loss/.test(value)) scores.cross_entropy += 3;
-  if (/bayes|posterior|prior|likelihood/.test(value)) scores.bayes_rule += 2;
-  if (/combination|choose|binomial coefficient|组合/.test(value)) scores.combination += 3;
-  if (/set|union|intersection|inclusion|venn|集合|并集|交集/.test(value)) scores.set_identity += 3;
-  if (/graph theory|degree|node|edge|图论|节点|边/.test(value)) scores.graph_degree += 3;
+  if (has(value, /\\lambda|\\alpha|\\beta|weighted|multi-objective|regularization|loss/) && has(value, /l_|loss|objective|j\(/)) {
+    addScore(scores, "weighted_loss", 5);
+  }
+  if (features.hasFraction && features.hasExponent && features.hasSummation && has(value, /z_|logit|p_i|softmax/)) {
+    addScore(scores, "softmax", 7);
+  }
+  if (has(value, /softmax/)) addScore(scores, "softmax", 4);
+  if (has(value, /\\exp\(z_|\\exp\(/) && features.hasSummation) addScore(scores, "softmax", 4);
+  if (has(value, /\\sigma|sigmoid/) && features.hasFraction && has(compact, /1\+e\^\{?-?x/)) {
+    addScore(scores, "sigmoid", 8);
+  }
+  if (has(value, /\\sigma|sigmoid/)) addScore(scores, "sigmoid", 4);
+  if (has(value, /\\theta|theta/) && has(value, /\\eta|eta|learning rate/) && has(value, /\\nabla|gradient/)) {
+    addScore(scores, "gradient_descent", 7);
+  }
+  if (features.hasLog && features.hasSummation && has(value, /h\(p,q\)|cross.?entropy|y_i|p_i|q_i|-\s*\\sum/)) {
+    addScore(scores, "cross_entropy", 7);
+  }
+  if (features.hasFraction && has(value, /p\(a\|b\)|p\(b\|a\)|posterior|prior|likelihood|bayes/)) {
+    addScore(scores, "bayes_rule", 8);
+  }
+  if (has(value, /\\binom|\\choose|combination|binomial coefficient/) || (features.hasFactorial && has(compact, /k!\(n-k\)!/))) {
+    addScore(scores, "combination", 8);
+  }
+  if (has(value, /p\(n,k\)|permutation|arrangement/) || (features.hasFactorial && has(compact, /n!\/\(n-k\)!/))) {
+    addScore(scores, "permutation", 7);
+  }
+  if (features.hasSetOperator || has(value, /\\cup|\\cap|inclusion-exclusion|venn|set identity/)) {
+    addScore(scores, "set_identity", 7);
+  }
+  if (features.hasGraphOperator || has(value, /graph|vertex|edge|handshaking|degree|\\deg/)) {
+    addScore(scores, "graph_degree", 7);
+  }
+  if (features.hasQuantifier || has(value, /\\forall|\\exists|∀|∃|truth table|predicate|implication|\\land|\\lor|\\neg/)) {
+    addScore(scores, "logic_quantifier", 8);
+  }
+  if (features.hasRecurrence || has(value, /recurrence|fibonacci|a_\{?n\}?=a_\{?n-1\}?/)) {
+    addScore(scores, "recurrence_relation", 7);
+  }
 
-  const [type, bestScore] = Object.entries(scores)
-    .filter(([typeName]) => typeName !== "unknown")
-    .sort((a, b) => b[1] - a[1])[0] as [FormulaType, number];
+  if (features.hasFraction) {
+    addScore(scores, "softmax", 0.5);
+    addScore(scores, "bayes_rule", 0.5);
+    addScore(scores, "sigmoid", 0.5);
+  }
+  if (features.hasSummation) {
+    addScore(scores, "cross_entropy", 0.5);
+    addScore(scores, "graph_degree", 0.5);
+  }
 
-  const maxUsefulScore = Math.max(4, ...Object.values(scores));
-  const detectedType = bestScore >= 2 ? type : "unknown";
+  const entries = Object.entries(scores).filter(([type]) => type !== "unknown") as [FormulaType, number][];
+  const [type, bestScore] = entries.sort((a, b) => b[1] - a[1])[0];
+  const secondScore = entries[1]?.[1] ?? 0;
+  const detectedType = bestScore >= 3 ? type : "unknown";
+  const confidence =
+    detectedType === "unknown" ? 0.2 : Math.min(0.98, Number((0.52 + Math.min(0.42, bestScore / 16) + Math.max(0, bestScore - secondScore) / 30).toFixed(2)));
 
   return {
     type: detectedType,
-    confidence: detectedType === "unknown" ? 0.2 : Math.min(0.98, Math.max(0.45, bestScore / maxUsefulScore)),
+    confidence,
     scores,
+    features,
   };
 }
 

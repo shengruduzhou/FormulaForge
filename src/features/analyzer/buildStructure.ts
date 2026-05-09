@@ -84,6 +84,18 @@ export function buildStructure(type: FormulaType): FormulaStructureNode {
           { id: "dedupe", label: "Divide by k!", latex: "\\frac{n!}{k!(n-k)!}", role: "Remove duplicate orders" },
         ],
       };
+    case "permutation":
+      return {
+        id: "permutation",
+        label: "Ordered selection",
+        role: "Counting with order",
+        children: [
+          { id: "n", label: "n items", latex: "n", role: "Total pool" },
+          { id: "k", label: "k slots", latex: "k", role: "Ordered positions" },
+          { id: "choices", label: "Falling choices", latex: "n(n-1)\\cdots(n-k+1)", role: "Choice count by slot" },
+          { id: "formula", label: "Permutation count", latex: "\\frac{n!}{(n-k)!}", role: "Closed form" },
+        ],
+      };
     case "set_identity":
       return {
         id: "sets",
@@ -106,6 +118,28 @@ export function buildStructure(type: FormulaType): FormulaStructureNode {
           { id: "edges", label: "Edges", latex: "E", role: "Connections" },
           { id: "degree", label: "Degree", latex: "\\deg(v)", role: "Edges touching v" },
           { id: "handshake", label: "Degree sum", latex: "\\sum_v \\deg(v)=2|E|", role: "Each edge counted twice" },
+        ],
+      };
+    case "logic_quantifier":
+      return {
+        id: "logic-quantifier",
+        label: "Quantified relation",
+        role: "First-order logic",
+        children: [
+          { id: "forall", label: "For every x", latex: "\\forall x\\in A", role: "Universal requirement" },
+          { id: "exists", label: "There exists y", latex: "\\exists y\\in B", role: "Witness for that x" },
+          { id: "relation", label: "Relation holds", latex: "R(x,y)", role: "Condition to satisfy" },
+        ],
+      };
+    case "recurrence_relation":
+      return {
+        id: "recurrence",
+        label: "Recursive definition",
+        role: "Sequence rule",
+        children: [
+          { id: "base", label: "Base cases", role: "Known starting values" },
+          { id: "previous", label: "Previous terms", latex: "a_{n-1}, a_{n-2}", role: "Dependencies" },
+          { id: "current", label: "Current term", latex: "a_n", role: "Computed value" },
         ],
       };
     default:

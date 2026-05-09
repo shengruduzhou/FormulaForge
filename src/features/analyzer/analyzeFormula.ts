@@ -4,27 +4,47 @@ import { createVisualizationSpec } from "../visualization/createVisualizationSpe
 import { buildStructure } from "./buildStructure";
 import { checkFormulaSyntax } from "./checkFormulaSyntax";
 import { detectFormulaTypeWithConfidence } from "./detectFormulaType";
-import { extractVariables } from "./extractVariables";
-import { generateExplanation } from "./generateExplanation";
+import { getFormulaBlueprint } from "./formulaBlueprints";
+import { inferDomain } from "./inferDomain";
 import { normalizeLatex } from "./normalizeLatex";
 
 export function analyzeFormula(input: FormulaInput): FormulaAnalysis {
-  const renderedLatex = normalizeLatex(input.latex);
-  const detection = detectFormulaTypeWithConfidence(renderedLatex, input.context);
+  const normalizedLatex = normalizeLatex(input.latex);
+  const detection = detectFormulaTypeWithConfidence(normalizedLatex, input.context);
   const detectedType = input.selectedType === "auto" ? detection.type : input.selectedType;
-  const explanation = generateExplanation(detectedType);
+  const blueprint = getFormulaBlueprint(detectedType);
+  const inferredDomain = inferDomain(detectedType, input.domain, detection.features);
+  const visualizationSpec = createVisualizationSpec(detectedType);
 
   return {
     id: input.id,
-    input: { ...input, latex: renderedLatex },
+    input: { ...input, latex: normalizedLatex },
     detectedType,
+    formulaFamily: detectedType,
     confidence: input.selectedType === "auto" ? detection.confidence : 0.99,
-    renderedLatex,
-    syntax: checkFormulaSyntax(renderedLatex),
-    variables: extractVariables(detectedType),
+    renderedLatex: normalizedLatex,
+    normalizedLatex,
+    inferredDomain,
+    features: detection.features,
+    syntax: checkFormulaSyntax(normalizedLatex),
+    oneLineIntuition: blueprint.oneLineIntuition,
+    plainExplanation: blueprint.plainExplanation,
+    beginnerExplanation: blueprint.beginnerExplanation,
+    analogy: blueprint.analogy,
+    strictExplanation: blueprint.strictExplanation,
+    whyItMatters: blueprint.whyItMatters,
+    readingOrder: blueprint.readingOrder,
+    computationSteps: blueprint.computationSteps,
+    toyExample: blueprint.toyExample,
+    variables: blueprint.variables,
+    symbols: blueprint.symbols,
     structure: buildStructure(detectedType),
-    visualization: createVisualizationSpec(detectedType),
+    visualization: visualizationSpec,
+    visualizationSpec,
+    relatedFormulas: blueprint.relatedFormulas,
+    prerequisites: blueprint.prerequisites,
+    boundaryCases: blueprint.boundaryCases,
+    pitfalls: blueprint.pitfalls,
     createdAt: new Date().toISOString(),
-    ...explanation,
   };
 }

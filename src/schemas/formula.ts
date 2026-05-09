@@ -6,8 +6,11 @@ export type FormulaType =
   | "cross_entropy"
   | "bayes_rule"
   | "combination"
+  | "permutation"
   | "set_identity"
   | "graph_degree"
+  | "logic_quantifier"
+  | "recurrence_relation"
   | "unknown";
 
 export type Domain = "ai_ml" | "math_stats" | "discrete_math" | "physics" | "engineering" | "general";
@@ -29,6 +32,35 @@ export interface VariableExplanation {
   min?: number;
   max?: number;
   step?: number;
+}
+
+export interface SymbolExplanation {
+  symbol: string;
+  name: string;
+  category: "variable" | "operator" | "function" | "relation" | "quantifier" | "constant" | "index";
+  meaning: string;
+  readAs: string;
+}
+
+export interface ReadingOrderItem {
+  order: number;
+  fragment: string;
+  explanation: string;
+}
+
+export interface FormulaFeatureSet {
+  hasFraction: boolean;
+  hasSummation: boolean;
+  hasExponent: boolean;
+  hasLog: boolean;
+  hasFactorial: boolean;
+  hasSetOperator: boolean;
+  hasGraphOperator: boolean;
+  hasQuantifier: boolean;
+  hasRecurrence: boolean;
+  operators: string[];
+  functions: string[];
+  identifiers: string[];
 }
 
 export interface FormulaStructureNode {

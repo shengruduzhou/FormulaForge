@@ -1,114 +1,219 @@
 # FormulaForge
 
-FormulaForge turns scientific formulas into intuitive explanations and interactive visualizations.
+FormulaForge is a formula parser and beginner-friendly formula explanation workspace. It turns LaTeX formulas, paper snippets, and optional OCR image input into structured explanations, symbol breakdowns, reading order, toy examples, related formulas, and interactive visualizations.
 
-Paste a LaTeX formula, choose a formula type, and get:
+## Features
 
-- plain-language explanation
-- beginner-friendly explanation and analogy
-- strict mathematical explanation
-- step-by-step computation walkthrough
-- toy numeric example
-- variable breakdown
-- formula structure diagram
-- interactive visualization
-- formula health check
-- related formulas and prerequisite concepts
-- boundary cases
-- common pitfalls
-- exportable Markdown / JSON formula card
-- optional backend API for server-side analysis, document formula extraction, and future OCR adapters
+- Modular formula analyzer:
+  - LaTeX normalization
+  - feature extraction
+  - formula family detection
+  - domain inference
+  - variable extraction
+  - symbol breakdown
+  - reading order
+  - structured explanation generation
+- Beginner-friendly explanation layers:
+  - one-line intuition
+  - elementary-math explanation
+  - analogy
+  - formal explanation
+  - variable and symbol breakdown
+  - step-by-step logic
+  - toy numerical example
+  - boundary cases and pitfalls
+  - prerequisite concepts
+  - same-domain related formulas
+- Discrete math visual support:
+  - Venn diagrams
+  - counting grids
+  - graph SVG diagrams
+  - truth tables
+  - recurrence trees
+- OCR image input:
+  - upload
+  - paste
+  - drag and drop
+  - backend Mathpix adapter
+  - optional local pix2tex-compatible adapter
+  - safe fallback when OCR is not configured
 
-## Why
+## Supported Formula Families
 
-Scientific papers often contain formulas that are hard to understand from notation alone. FormulaForge helps readers build intuition by showing how each term works and how parameters affect the formula's behavior.
-
-## Supported Formula Types
-
-- Weighted loss functions
-- Softmax and sigmoid
-- Gradient descent update rules
+- Weighted loss
+- Sigmoid
+- Softmax
 - Cross entropy
 - Bayes' rule
-- Combinations
-- Set identities
-- Graph degree formulas
+- Combinations and permutations
+- Set identities and inclusion-exclusion
+- Graph degree / handshaking lemma
+- Logic quantifiers
+- Recurrence relations
 
-More formula families can be added through the analyzer and visualization template modules.
+## Local Development
 
-## Product Features
-
-- Debounced automatic analysis after typing pauses
-- Chinese / English UI and explanation mode
-- Light / dark theme with localStorage persistence
-- GitHub link wired to `https://github.com/shengruduzhou/FormulaForge`
-- Discrete-math visual templates for Venn-style set diagrams, combination counting, and graph degree intuition
-- Rule-based formula health checks for common LaTeX and OCR-like mistakes
-- Node backend scaffold with `/api/health`, `/api/formula/analyze`, `/api/document/extract-formulas`, and `/api/ocr/image`
-
-## Tech Stack
-
-- React
-- Vite
-- TypeScript
-- Tailwind CSS
-- KaTeX
-- Zustand
-- Vitest
-- Node.js backend with no required runtime framework
-
-## Frontend First, Backend Ready
-
-The core workspace still runs in the browser, so the app remains easy to deploy as a static site. A lightweight backend is included for features that should not live purely on the client, especially OCR provider keys, file upload processing, and future context-aware formula analysis.
-
-## Development
+Install dependencies:
 
 ```bash
 npm install
+```
+
+Run the frontend:
+
+```bash
 npm run dev
 ```
 
-Run the API server:
+Run the backend API:
 
 ```bash
 npm run server
 ```
 
-The local API defaults to `http://127.0.0.1:8787`. See `server/README.md` for endpoint examples.
+The frontend runs on `http://127.0.0.1:5173` and proxies `/api` to `http://127.0.0.1:8787`.
 
-## Quality Checks
+Quality checks:
 
 ```bash
 npm test
 npm run build
 ```
 
+## Backend API
+
+Compatible endpoints:
+
+- `GET /api/health`
+- `POST /api/formula/analyze`
+- `POST /api/document/extract-formulas`
+- `POST /api/ocr/image`
+
+Formula analysis example:
+
+```bash
+curl -X POST http://127.0.0.1:8787/api/formula/analyze \
+  -H "Content-Type: application/json" \
+  -d "{\"latex\":\"p_i=\\\\frac{e^{z_i}}{\\\\sum_j e^{z_j}}\"}"
+```
+
+OCR example:
+
+```bash
+curl -X POST http://127.0.0.1:8787/api/ocr/image \
+  -H "Content-Type: application/json" \
+  -d "{\"image\":\"data:image/png;base64,...\"}"
+```
+
+When OCR is not configured, the route returns a useful `503` JSON response and manual formula input continues to work.
+
+## OCR Setup
+
+Copy the backend env example:
+
+```bash
+cp server/.env.example server/.env
+```
+
+Mathpix:
+
+```bash
+MATHPIX_APP_ID=your_app_id
+MATHPIX_APP_KEY=your_app_key
+```
+
+Optional local pix2tex-compatible service:
+
+```bash
+OCR_SERVICE_URL=http://127.0.0.1:8501/predict
+```
+
+If `OCR_SERVICE_URL` is set, FormulaForge tries the local service first. Otherwise it uses Mathpix when both Mathpix variables are present.
+
+## Deployment
+
+### Vercel Frontend
+
+1. Import the repository into Vercel.
+2. Use the Vite defaults:
+   - build command: `npm run build`
+   - output directory: `dist`
+3. Set a rewrite or environment-specific API base if your backend is hosted separately.
+
+For a separate backend host, point `/api/*` to that backend through Vercel rewrites or configure your deployment proxy.
+
+### Render / Railway Backend
+
+Deploy the repository as a Node service:
+
+```bash
+npm install
+npm run server
+```
+
+Recommended service settings:
+
+- start command: `npm run server`
+- port: `8787` or platform-provided `PORT`
+- environment variables:
+  - `MATHPIX_APP_ID`
+  - `MATHPIX_APP_KEY`
+  - `OCR_SERVICE_URL` if using local OCR
+  - `CORS_ORIGIN` set to your frontend origin
+
+### VPS + Nginx + PM2
+
+Install and build:
+
+```bash
+git clone https://github.com/shengruduzhou/FormulaForge.git
+cd FormulaForge
+npm install
+npm run build
+npm install -g pm2
+pm2 start server/index.js --name formulaforge-api
+pm2 save
+```
+
+Example Nginx server:
+
+```nginx
+server {
+  server_name formulaforge.example.com;
+
+  root /var/www/FormulaForge/dist;
+  index index.html;
+
+  location / {
+    try_files $uri /index.html;
+  }
+
+  location /api/ {
+    proxy_pass http://127.0.0.1:8787/api/;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+  }
+}
+```
+
+Then configure TLS with Certbot or your preferred certificate manager.
+
 ## Project Structure
 
 ```text
 src/
-  app/routes/             page-level routes
-  components/             reusable UI and formula surfaces
-  features/analyzer/      formula analysis pipeline
-  features/visualization/ visualization math helpers and specs
-  schemas/                TypeScript domain models
-  store/                  local workspace state
+  app/routes/                 page routes
+  components/formula/          input, OCR, formula preview
+  components/explanation/      explanation tabs and cards
+  components/visualization/    SVG and interactive renderers
+  features/analyzer/           modular formula analyzer
+  features/visualization/      visualization spec builders
+  schemas/                     TypeScript domain models
+  store/                       workspace state
 server/
-  services/               backend formula and document services
-  index.js                Node HTTP API entrypoint
+  services/                    API formula, document, and OCR services
+  index.js                     Node HTTP API entrypoint
 ```
-
-## Roadmap
-
-- MathLive input
-- local history
-- PNG export
-- OCR provider adapters
-- LLM provider adapters
-- PDF formula extraction
-- OCR for formula screenshots
-- More visualization templates and a deeper formula ontology
-
-## Deployment
-
-The frontend can be deployed to Vercel, Cloudflare Pages, or GitHub Pages after `npm run build`. Deploy `server/` separately when OCR, file upload, or protected API keys are enabled.

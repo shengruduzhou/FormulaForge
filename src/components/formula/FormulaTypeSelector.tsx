@@ -10,8 +10,11 @@ const options: Array<FormulaType | "auto"> = [
   "cross_entropy",
   "bayes_rule",
   "combination",
+  "permutation",
   "set_identity",
   "graph_degree",
+  "logic_quantifier",
+  "recurrence_relation",
 ];
 
 interface FormulaTypeSelectorProps {

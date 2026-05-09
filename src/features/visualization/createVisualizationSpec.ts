@@ -16,7 +16,7 @@ export function createVisualizationSpec(type: FormulaType): VisualizationSpec {
       };
     case "softmax":
       return {
-        kind: "softmax_distribution",
+        kind: "probability_tree",
         title: "Softmax Temperature Explorer",
         description: "Move logits and temperature to watch probability mass shift between classes.",
         parameters: [
@@ -28,7 +28,7 @@ export function createVisualizationSpec(type: FormulaType): VisualizationSpec {
       };
     case "sigmoid":
       return {
-        kind: "sigmoid_curve",
+        kind: "curve",
         title: "Sigmoid Curve Explorer",
         description: "Move x along the logistic curve and watch the output saturate.",
         parameters: [{ name: "x", symbol: "x", value: 0, min: -8, max: 8, step: 0.1 }],
@@ -44,18 +44,36 @@ export function createVisualizationSpec(type: FormulaType): VisualizationSpec {
           { name: "initial y", symbol: "y_0", value: 2.2, min: -4, max: 4, step: 0.1 },
         ],
       };
+    case "cross_entropy":
+      return {
+        kind: "truth_table",
+        title: "Cross Entropy Surprise Table",
+        description: "Compare target and predicted probabilities to see where the penalty comes from.",
+        parameters: [],
+      };
+    case "bayes_rule":
+      return {
+        kind: "probability_tree",
+        title: "Bayes Evidence Tree",
+        description: "Trace prior, likelihood, evidence, and posterior in one probability tree.",
+        parameters: [],
+      };
     case "set_identity":
       return {
-        kind: "venn_diagram",
+        kind: "venn",
         title: "Set Relationship Diagram",
         description: "Use a Venn-style view to see union, intersection, and double-counted overlap.",
         parameters: [],
       };
     case "combination":
+    case "permutation":
       return {
-        kind: "combination_counter",
-        title: "Combination Counter",
-        description: "Change n and k to see how many unordered selections are possible.",
+        kind: "counting_grid",
+        title: type === "combination" ? "Combination Counting Grid" : "Permutation Counting Grid",
+        description:
+          type === "combination"
+            ? "Change n and k to see unordered selections after duplicate orders are removed."
+            : "See how ordered slots multiply as each choice removes one item.",
         parameters: [
           { name: "n", symbol: "n", value: 5, min: 1, max: 10, step: 1 },
           { name: "k", symbol: "k", value: 2, min: 0, max: 10, step: 1 },
@@ -63,9 +81,23 @@ export function createVisualizationSpec(type: FormulaType): VisualizationSpec {
       };
     case "graph_degree":
       return {
-        kind: "graph_degree_diagram",
+        kind: "graph",
         title: "Graph Degree Diagram",
         description: "Inspect a small graph and see how degrees count incident edges.",
+        parameters: [],
+      };
+    case "logic_quantifier":
+      return {
+        kind: "truth_table",
+        title: "Quantifier Truth Table",
+        description: "Inspect small relation examples and see when the quantified statement is true.",
+        parameters: [],
+      };
+    case "recurrence_relation":
+      return {
+        kind: "recurrence_tree",
+        title: "Recurrence Tree",
+        description: "Expand a recurrence into the previous terms it depends on.",
         parameters: [],
       };
     default:

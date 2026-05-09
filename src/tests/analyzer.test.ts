@@ -33,6 +33,8 @@ describe("detectFormulaType", () => {
     expect(detectFormulaType("\\binom{n}{k} = \\frac{n!}{k!(n-k)!}")).toBe("combination");
     expect(detectFormulaType("|A \\cup B| = |A| + |B| - |A \\cap B|")).toBe("set_identity");
     expect(detectFormulaType("\\sum_{v \\in V} \\deg(v) = 2|E|", "graph degree theorem")).toBe("graph_degree");
+    expect(detectFormulaType("\\forall x\\in A,\\exists y\\in B: R(x,y)")).toBe("logic_quantifier");
+    expect(detectFormulaType("a_n = a_{n-1}+a_{n-2}", "recurrence")).toBe("recurrence_relation");
   });
 });
 
@@ -48,9 +50,46 @@ describe("analyzeFormula", () => {
     expect(result.detectedType).toBe("softmax");
     expect(result.variables.length).toBeGreaterThan(0);
     expect(result.structure.children?.length).toBeGreaterThan(0);
-    expect(result.visualization.kind).toBe("softmax_distribution");
+    expect(result.visualization.kind).toBe("probability_tree");
+    expect(result.oneLineIntuition).toContain("Softmax");
+    expect(result.symbols.length).toBeGreaterThan(0);
+    expect(result.readingOrder.length).toBeGreaterThan(0);
     expect(result.computationSteps.length).toBeGreaterThan(0);
     expect(result.relatedFormulas.length).toBeGreaterThan(0);
     expect(result.syntax.isValid).toBe(true);
+  });
+
+  it("produces clearly different explanations for acceptance formulas", () => {
+    const formulas = [
+      "\\sigma(x)=\\frac{1}{1+e^{-x}}",
+      "p_i=\\frac{e^{z_i}}{\\sum_j e^{z_j}}",
+      "H(p,q)=-\\sum_i p_i\\log q_i",
+      "\\binom{n}{k}=\\frac{n!}{k!(n-k)!}",
+      "|A\\cup B|=|A|+|B|-|A\\cap B|",
+      "\\sum_{v\\in V}\\deg(v)=2|E|",
+      "P(A|B)=\\frac{P(B|A)P(A)}{P(B)}",
+      "\\forall x\\in A,\\exists y\\in B: R(x,y)",
+    ];
+
+    const results = formulas.map((latex) =>
+      analyzeFormula({
+        id: latex,
+        latex,
+        domain: "general",
+        selectedType: "auto",
+      }),
+    );
+
+    expect(results.map((result) => result.detectedType)).toEqual([
+      "sigmoid",
+      "softmax",
+      "cross_entropy",
+      "combination",
+      "set_identity",
+      "graph_degree",
+      "bayes_rule",
+      "logic_quantifier",
+    ]);
+    expect(new Set(results.map((result) => result.oneLineIntuition)).size).toBe(formulas.length);
   });
 });

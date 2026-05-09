@@ -1,9 +1,10 @@
 import { createServer } from "node:http";
 import { analyzeFormulaRequest } from "./services/formulaAnalyzer.js";
 import { extractFormulaCandidates } from "./services/documentExtractor.js";
+import { recognizeFormulaImage } from "./services/ocrService.js";
 
 const PORT = Number.parseInt(process.env.PORT ?? "8787", 10);
-const MAX_BODY_BYTES = Number.parseInt(process.env.MAX_BODY_BYTES ?? "1048576", 10);
+const MAX_BODY_BYTES = Number.parseInt(process.env.MAX_BODY_BYTES ?? "6291456", 10);
 
 function sendJson(response, status, payload) {
   response.writeHead(status, {
@@ -60,7 +61,7 @@ async function route(request, response) {
       status: "ok",
       service: "FormulaForge API",
       version: "0.1.0",
-      capabilities: ["formula-analysis", "document-formula-extraction", "ocr-adapter-placeholder"],
+      capabilities: ["formula-analysis", "document-formula-extraction", "mathpix-ocr", "local-pix2tex-ocr"],
     });
     return;
   }
@@ -81,10 +82,9 @@ async function route(request, response) {
   }
 
   if (request.method === "POST" && url.pathname === "/api/ocr/image") {
-    sendJson(response, 501, {
-      error: "OCR provider is not configured yet.",
-      nextStep: "Connect Mathpix or another OCR adapter on the server so API keys stay off the client.",
-    });
+    const body = await readBody(request);
+    const result = await recognizeFormulaImage(body);
+    sendJson(response, result.status, result.payload);
     return;
   }
 

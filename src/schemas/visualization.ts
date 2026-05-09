@@ -1,4 +1,11 @@
 export type VisualizationKind =
+  | "venn"
+  | "graph"
+  | "counting_grid"
+  | "truth_table"
+  | "curve"
+  | "probability_tree"
+  | "recurrence_tree"
   | "weighted_contribution"
   | "softmax_distribution"
   | "sigmoid_curve"

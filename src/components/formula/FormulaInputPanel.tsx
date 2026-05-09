@@ -6,6 +6,7 @@ import { Button } from "../ui/Button";
 import { Card, CardBody, CardHeader } from "../ui/Card";
 import { Textarea } from "../ui/Textarea";
 import { FormulaTypeSelector } from "./FormulaTypeSelector";
+import { ImageFormulaUploader } from "./ImageFormulaUploader";
 
 interface FormulaInputPanelProps {
   value: FormulaInput;
@@ -35,6 +36,7 @@ export function FormulaInputPanel({ value, onChange, onAnalyze, onLoadExample, o
           <label className="text-sm font-semibold text-lens-ink">{text.formulaType}</label>
           <FormulaTypeSelector value={value.selectedType} onChange={(selectedType) => onChange({ ...value, selectedType })} />
         </div>
+        <ImageFormulaUploader onLatex={(latex) => onChange({ ...value, latex })} />
         <div className="grid gap-2">
           <label className="text-sm font-semibold text-lens-ink" htmlFor="latex">
             {text.latexFormula}

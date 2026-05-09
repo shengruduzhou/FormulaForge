@@ -70,6 +70,15 @@ export const examples: FormulaExample[] = [
     selectedType: "combination",
   },
   {
+    id: "logic-quantifier",
+    title: "Quantified Relation",
+    summary: "Read a first-order logic statement with nested quantifiers.",
+    latex: "\\forall x\\in A,\\exists y\\in B: R(x,y)",
+    context: "A predicate logic formula in discrete mathematics.",
+    domain: "discrete_math",
+    selectedType: "logic_quantifier",
+  },
+  {
     id: "set-union",
     title: "Inclusion-Exclusion for Two Sets",
     summary: "Count a union without double-counting the overlap.",
@@ -98,8 +107,11 @@ export const formulaTypeLabels: Record<FormulaType | "auto", string> = {
   cross_entropy: "Cross Entropy",
   bayes_rule: "Bayes' Rule",
   combination: "Combination",
+  permutation: "Permutation",
   set_identity: "Set Identity",
   graph_degree: "Graph Degree",
+  logic_quantifier: "Logic / Quantifier",
+  recurrence_relation: "Recurrence Relation",
   unknown: "Unknown",
 };
 

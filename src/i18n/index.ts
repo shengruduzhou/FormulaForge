@@ -120,8 +120,11 @@ export const formulaTypeLabelsByLanguage: Record<Language, Record<FormulaType | 
     cross_entropy: "Cross Entropy",
     bayes_rule: "Bayes' Rule",
     combination: "Combination",
+    permutation: "Permutation",
     set_identity: "Set Identity",
     graph_degree: "Graph Degree",
+    logic_quantifier: "Logic / Quantifier",
+    recurrence_relation: "Recurrence Relation",
     unknown: "Unknown",
   },
   zh: {
@@ -133,8 +136,11 @@ export const formulaTypeLabelsByLanguage: Record<Language, Record<FormulaType | 
     cross_entropy: "交叉熵",
     bayes_rule: "贝叶斯公式",
     combination: "组合数",
+    permutation: "排列数",
     set_identity: "集合公式",
     graph_degree: "图论度数",
+    logic_quantifier: "逻辑量词",
+    recurrence_relation: "递推关系",
     unknown: "未识别",
   },
 };
@@ -432,6 +438,76 @@ const zhAnalysisCopy: Record<FormulaType, AnalysisCopy> = {
     ],
     pitfalls: ["有向图的入度、出度和无向度数不是同一个概念。", "多重边是否重复计数取决于图的定义。"],
   },
+  permutation: {
+    plainExplanation: "排列数计算从 n 个对象中按顺序选出 k 个对象的方式数。",
+    beginnerExplanation: "如果先选 Alice 再选 Bob 和先选 Bob 再选 Alice 算不同结果，就用排列。",
+    analogy: "像给比赛排金银铜名次，同样三个人顺序不同就是不同结果。",
+    strictExplanation: "P(n,k)=n!/(n-k)! 计数从 n 个对象中抽取长度为 k 的有序不重复序列。",
+    whyItMatters: "排列常用于排名、排班、密码、抽样和离散概率。",
+    computationSteps: [
+      { title: "填第一个位置", description: "第一个位置有 n 种选择。" },
+      { title: "填后续位置", description: "每选走一个对象，可选对象少一个。" },
+      { title: "连乘", description: "得到 n(n-1)...(n-k+1)。", expression: "\\frac{n!}{(n-k)!}" },
+    ],
+    toyExample: {
+      title: "从 4 个中有序选 2 个",
+      description: "对象是 A、B、C、D。",
+      steps: ["第一位有 4 种选择。", "第二位剩 3 种选择。"],
+      result: "P(4,2)=12。",
+    },
+    boundaryCases: [
+      { title: "k = 0", description: "空排列只有一种。" },
+      { title: "k > n", description: "不允许重复时没有合法排列。" },
+    ],
+    pitfalls: ["顺序不重要时不要用排列，应使用组合。"],
+  },
+  logic_quantifier: {
+    plainExplanation: "这个公式表示：A 中每个 x 都能在 B 中找到至少一个 y，使 R(x,y) 成立。",
+    beginnerExplanation: "无论你从 A 里挑哪个对象，都必须能在 B 里找到一个匹配对象。",
+    analogy: "像每个学生至少有一位导师。",
+    strictExplanation: "这是一个一阶逻辑命题，先对 A 做全称量化，再对 B 做存在量化，最后检查关系 R(x,y)。",
+    whyItMatters: "量词顺序是离散数学、谓词逻辑、关系和证明中的核心。",
+    computationSteps: [
+      { title: "任选 x", description: "命题必须对 A 中每一个 x 成立。" },
+      { title: "寻找 y", description: "对当前 x，必须存在至少一个 B 中的 y。" },
+      { title: "检查关系", description: "确认 R(x,y) 为真。" },
+    ],
+    toyExample: {
+      title: "学生和导师",
+      description: "A 是学生集合，B 是导师集合，R 表示“被分配给”。",
+      steps: ["选学生 Ana。", "找到导师 Mei。", "检查 Ana 是否分配给 Mei。"],
+      result: "如果每个学生都能找到导师，命题为真。",
+    },
+    boundaryCases: [
+      { title: "A 为空", description: "命题真空成立。" },
+      { title: "B 为空且 A 非空", description: "找不到 y，命题为假。" },
+      { title: "交换量词顺序", description: "∃y∀x 比 ∀x∃y 强得多，含义不同。" },
+    ],
+    pitfalls: ["不要随意交换全称量词和存在量词。", "存在表示至少一个，不表示唯一。"],
+  },
+  recurrence_relation: {
+    plainExplanation: "递推关系用前面的项定义后面的项。",
+    beginnerExplanation: "它像一个逐步生成序列的规则：先给起点，再用旧值算新值。",
+    analogy: "像计算的家谱树，一个值依赖它的父节点值。",
+    strictExplanation: "递推关系通过连接 a_n 与前若干项以及初始条件来定义序列。",
+    whyItMatters: "递推关系常见于算法分析、动态规划、数列和递归定义。",
+    computationSteps: [
+      { title: "读取初始值", description: "没有初始值，递推无法开始。" },
+      { title: "套用规则", description: "用前面的项计算当前项。" },
+      { title: "重复生成", description: "不断应用规则得到后续项。" },
+    ],
+    toyExample: {
+      title: "斐波那契式递推",
+      description: "a_n=a_{n-1}+a_{n-2}, a_0=0, a_1=1。",
+      steps: ["a_2=1。", "a_3=2。", "a_4=3。"],
+      result: "每一项都由前两项生成。",
+    },
+    boundaryCases: [
+      { title: "缺少初始条件", description: "序列无法唯一确定。" },
+      { title: "递归展开太深", description: "直接展开可能导致计算量快速膨胀。" },
+    ],
+    pitfalls: ["递推式不等于闭式公式。", "递推必须说明适用的 n 范围。"],
+  },
   unknown: {
     plainExplanation: "FormulaForge 还不能可靠匹配这个公式模板。你可以手动选择公式类型、补充上下文，或尝试示例公式。",
     beginnerExplanation: "应用可以渲染公式，但还不知道应该用哪条讲解路径和哪种图形来解释它。",
@@ -542,6 +618,34 @@ const zhStructureText: Record<string, string> = {
 };
 
 const zhVisualizationText: Record<VisualizationKind, { title: string; description: string }> = {
+  venn: {
+    title: "集合关系图",
+    description: "用 Venn 图理解并集、交集和重复计数。",
+  },
+  graph: {
+    title: "图的度数示意图",
+    description: "查看一个小图，理解度数如何数与节点相连的边。",
+  },
+  counting_grid: {
+    title: "计数网格",
+    description: "改变 n 和 k，观察选择数量如何变化。",
+  },
+  truth_table: {
+    title: "真值表",
+    description: "用小规模真假表理解逻辑或损失中的关键情况。",
+  },
+  curve: {
+    title: "函数曲线",
+    description: "拖动输入，观察函数输出如何变化。",
+  },
+  probability_tree: {
+    title: "概率树",
+    description: "沿分支查看概率如何组合与归一化。",
+  },
+  recurrence_tree: {
+    title: "递推树",
+    description: "把递推式展开成它依赖的前序项。",
+  },
   weighted_contribution: {
     title: "加权贡献探索器",
     description: "拖动 lambda 和基础损失值，观察每一项如何改变总目标。",
