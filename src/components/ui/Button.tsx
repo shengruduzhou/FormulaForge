@@ -4,9 +4,10 @@ type Variant = "primary" | "secondary" | "ghost" | "danger";
 
 const variants: Record<Variant, string> = {
   primary: "bg-lens-primary text-white shadow-sm hover:bg-indigo-700",
-  secondary: "border border-lens-line bg-white text-lens-ink hover:border-slate-300 hover:bg-slate-50",
-  ghost: "text-lens-muted hover:bg-slate-100 hover:text-lens-ink",
-  danger: "border border-red-200 bg-white text-lens-danger hover:bg-red-50",
+  secondary:
+    "border border-lens-line bg-white text-lens-ink hover:border-slate-300 hover:bg-slate-50 dark:bg-slate-950 dark:hover:bg-slate-900",
+  ghost: "text-lens-muted hover:bg-slate-100 hover:text-lens-ink dark:hover:bg-slate-900",
+  danger: "border border-red-200 bg-white text-lens-danger hover:bg-red-50 dark:bg-slate-950 dark:hover:bg-red-950/30",
 };
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {

@@ -19,7 +19,7 @@ export function Slider({ label, value, min, max, step, onChange, suffix = "" }: 
         </span>
       </span>
       <input
-        className="h-2 w-full cursor-pointer appearance-none rounded-full bg-slate-200 accent-lens-primary"
+        className="h-2 w-full cursor-pointer appearance-none rounded-full bg-slate-200 accent-lens-primary dark:bg-slate-800"
         type="range"
         value={value}
         min={min}

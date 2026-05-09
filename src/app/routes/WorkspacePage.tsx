@@ -18,6 +18,16 @@ export function WorkspacePage() {
     }
   }, [loadExample]);
 
+  useEffect(() => {
+    if (!input.latex.trim()) return;
+
+    const timer = window.setTimeout(() => {
+      analyze();
+    }, 650);
+
+    return () => window.clearTimeout(timer);
+  }, [input, analyze]);
+
   return (
     <main className="mx-auto grid max-w-7xl gap-5 px-4 py-6 sm:px-6 lg:grid-cols-[360px_1fr] lg:px-8">
       <aside>

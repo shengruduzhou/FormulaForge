@@ -1,5 +1,6 @@
 import { Eraser, FlaskConical, Play } from "lucide-react";
 import { examples } from "../../features/examples/examples";
+import { domainLabelsByLanguage, uiText, useI18nStore } from "../../i18n";
 import type { Domain, FormulaInput } from "../../schemas/formula";
 import { Button } from "../ui/Button";
 import { Card, CardBody, CardHeader } from "../ui/Card";
@@ -14,31 +15,29 @@ interface FormulaInputPanelProps {
   onClear: () => void;
 }
 
-const domains: Array<{ value: Domain; label: string }> = [
-  { value: "ai_ml", label: "AI / Machine Learning" },
-  { value: "math_stats", label: "Math / Statistics" },
-  { value: "physics", label: "Physics" },
-  { value: "engineering", label: "Engineering" },
-  { value: "general", label: "General" },
-];
+const domains: Domain[] = ["ai_ml", "math_stats", "discrete_math", "physics", "engineering", "general"];
 
 export function FormulaInputPanel({ value, onChange, onAnalyze, onLoadExample, onClear }: FormulaInputPanelProps) {
+  const language = useI18nStore((state) => state.language);
+  const text = uiText[language];
+  const domainLabels = domainLabelsByLanguage[language];
+
   return (
     <Card className="h-fit">
       <CardHeader>
         <div className="flex items-center gap-2">
           <FlaskConical className="text-lens-primary" size={18} />
-          <h2 className="text-base font-semibold text-lens-ink">Formula Input</h2>
+          <h2 className="text-base font-semibold text-lens-ink">{text.formulaInput}</h2>
         </div>
       </CardHeader>
       <CardBody className="grid gap-5">
         <div className="grid gap-2">
-          <label className="text-sm font-semibold text-lens-ink">Formula Type</label>
+          <label className="text-sm font-semibold text-lens-ink">{text.formulaType}</label>
           <FormulaTypeSelector value={value.selectedType} onChange={(selectedType) => onChange({ ...value, selectedType })} />
         </div>
         <div className="grid gap-2">
           <label className="text-sm font-semibold text-lens-ink" htmlFor="latex">
-            LaTeX Formula
+            {text.latexFormula}
           </label>
           <Textarea
             id="latex"
@@ -49,7 +48,7 @@ export function FormulaInputPanel({ value, onChange, onAnalyze, onLoadExample, o
         </div>
         <div className="grid gap-2">
           <label className="text-sm font-semibold text-lens-ink" htmlFor="context">
-            Context
+            {text.context}
           </label>
           <Textarea
             className="min-h-20 font-sans"
@@ -61,34 +60,35 @@ export function FormulaInputPanel({ value, onChange, onAnalyze, onLoadExample, o
         </div>
         <div className="grid gap-2">
           <label className="text-sm font-semibold text-lens-ink" htmlFor="domain">
-            Domain
+            {text.domain}
           </label>
           <select
-            className="min-h-10 rounded-lg border border-lens-line bg-white px-3 text-sm font-medium text-lens-ink outline-none focus:border-lens-primary focus:ring-2 focus:ring-indigo-100"
+            className="min-h-10 rounded-lg border border-lens-line bg-white px-3 text-sm font-medium text-lens-ink outline-none focus:border-lens-primary focus:ring-2 focus:ring-indigo-100 dark:bg-slate-950"
             id="domain"
             value={value.domain}
             onChange={(event) => onChange({ ...value, domain: event.target.value as Domain })}
           >
             {domains.map((domain) => (
-              <option key={domain.value} value={domain.value}>
-                {domain.label}
+              <option key={domain} value={domain}>
+                {domainLabels[domain]}
               </option>
             ))}
           </select>
+          <p className="text-xs text-lens-muted">{text.autoAnalyze}</p>
         </div>
         <div className="grid gap-2">
           <Button onClick={onAnalyze} disabled={!value.latex.trim()}>
             <Play size={16} />
-            Analyze Formula
+            {text.analyzeFormula}
           </Button>
           <div className="grid grid-cols-2 gap-2">
             <select
-              className="min-h-10 rounded-lg border border-lens-line bg-white px-3 text-sm font-semibold text-lens-muted outline-none focus:border-lens-primary"
+              className="min-h-10 rounded-lg border border-lens-line bg-white px-3 text-sm font-semibold text-lens-muted outline-none focus:border-lens-primary dark:bg-slate-950"
               onChange={(event) => event.target.value && onLoadExample(event.target.value)}
               value=""
               aria-label="Load example"
             >
-              <option value="">Load Example</option>
+              <option value="">{text.loadExample}</option>
               {examples.map((example) => (
                 <option key={example.id} value={example.id}>
                   {example.title}
@@ -97,7 +97,7 @@ export function FormulaInputPanel({ value, onChange, onAnalyze, onLoadExample, o
             </select>
             <Button variant="secondary" onClick={onClear}>
               <Eraser size={16} />
-              Clear
+              {text.clear}
             </Button>
           </div>
         </div>

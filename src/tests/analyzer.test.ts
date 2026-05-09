@@ -26,6 +26,14 @@ describe("detectFormulaType", () => {
     expect(detectFormulaType("theta update with learning rate eta and gradient")).toBe("gradient_descent");
     expect(detectFormulaType("\\theta_t - \\eta \\nabla L")).toBe("gradient_descent");
   });
+
+  it("detects expanded formula families", () => {
+    expect(detectFormulaType("L = -\\sum_i y_i \\log p_i", "cross entropy classification loss")).toBe("cross_entropy");
+    expect(detectFormulaType("P(A \\mid B) = \\frac{P(B \\mid A)P(A)}{P(B)}", "Bayes rule")).toBe("bayes_rule");
+    expect(detectFormulaType("\\binom{n}{k} = \\frac{n!}{k!(n-k)!}")).toBe("combination");
+    expect(detectFormulaType("|A \\cup B| = |A| + |B| - |A \\cap B|")).toBe("set_identity");
+    expect(detectFormulaType("\\sum_{v \\in V} \\deg(v) = 2|E|", "graph degree theorem")).toBe("graph_degree");
+  });
 });
 
 describe("analyzeFormula", () => {
@@ -41,5 +49,8 @@ describe("analyzeFormula", () => {
     expect(result.variables.length).toBeGreaterThan(0);
     expect(result.structure.children?.length).toBeGreaterThan(0);
     expect(result.visualization.kind).toBe("softmax_distribution");
+    expect(result.computationSteps.length).toBeGreaterThan(0);
+    expect(result.relatedFormulas.length).toBeGreaterThan(0);
+    expect(result.syntax.isValid).toBe(true);
   });
 });

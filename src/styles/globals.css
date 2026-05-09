@@ -3,12 +3,25 @@
 @tailwind utilities;
 
 :root {
+  --lens-ink: #0f172a;
+  --lens-muted: #64748b;
+  --lens-line: #e2e8f0;
+  --lens-paper: #f8fafc;
   color: #0f172a;
   background: #f8fafc;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.dark {
+  --lens-ink: #e5e7eb;
+  --lens-muted: #94a3b8;
+  --lens-line: #1e293b;
+  --lens-paper: #020617;
+  color: #e5e7eb;
+  background: #020617;
 }
 
 html {
@@ -20,6 +33,11 @@ body {
   min-width: 320px;
   min-height: 100vh;
   font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  background: #f8fafc;
+}
+
+.dark body {
+  background: #020617;
 }
 
 button,

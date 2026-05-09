@@ -25,7 +25,7 @@ export function SoftmaxViz() {
         ))}
         <Slider label="Temperature T" value={temperature} min={0.1} max={5} step={0.1} onChange={setTemperature} />
       </div>
-      <div className="rounded-lg border border-lens-line bg-slate-50 p-4">
+      <div className="rounded-lg border border-lens-line bg-slate-50 p-4 dark:bg-slate-900">
         <div className="flex items-start justify-between gap-4">
           <div>
             <h3 className="text-sm font-semibold text-lens-ink">Probability Distribution</h3>
@@ -33,7 +33,7 @@ export function SoftmaxViz() {
               Sum: {probabilities.reduce((sum, value) => sum + value, 0).toFixed(4)}
             </p>
           </div>
-          <p className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-lens-muted">
+          <p className="rounded-md bg-white px-3 py-2 text-sm font-semibold text-lens-muted dark:bg-slate-950">
             {temperature < 0.7 ? "sharp" : temperature > 2.5 ? "smooth" : "balanced"}
           </p>
         </div>

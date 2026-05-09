@@ -7,7 +7,7 @@ export function createVisualizationSpec(type: FormulaType): VisualizationSpec {
       return {
         kind: "weighted_contribution",
         title: "Weighted Contribution Explorer",
-        description: "Adjust λ and loss values to see how each term changes the total objective.",
+        description: "Adjust lambda and loss values to see how each term changes the total objective.",
         parameters: [
           { name: "lambda 1", symbol: "\\lambda_1", value: 1, min: 0, max: 3, step: 0.1 },
           { name: "lambda 2", symbol: "\\lambda_2", value: 0.8, min: 0, max: 3, step: 0.1 },
@@ -43,6 +43,30 @@ export function createVisualizationSpec(type: FormulaType): VisualizationSpec {
           { name: "initial x", symbol: "x_0", value: 2.8, min: -4, max: 4, step: 0.1 },
           { name: "initial y", symbol: "y_0", value: 2.2, min: -4, max: 4, step: 0.1 },
         ],
+      };
+    case "set_identity":
+      return {
+        kind: "venn_diagram",
+        title: "Set Relationship Diagram",
+        description: "Use a Venn-style view to see union, intersection, and double-counted overlap.",
+        parameters: [],
+      };
+    case "combination":
+      return {
+        kind: "combination_counter",
+        title: "Combination Counter",
+        description: "Change n and k to see how many unordered selections are possible.",
+        parameters: [
+          { name: "n", symbol: "n", value: 5, min: 1, max: 10, step: 1 },
+          { name: "k", symbol: "k", value: 2, min: 0, max: 10, step: 1 },
+        ],
+      };
+    case "graph_degree":
+      return {
+        kind: "graph_degree_diagram",
+        title: "Graph Degree Diagram",
+        description: "Inspect a small graph and see how degrees count incident edges.",
+        parameters: [],
       };
     default:
       return {

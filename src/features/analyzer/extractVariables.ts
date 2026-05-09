@@ -118,6 +118,39 @@ export function extractVariables(type: FormulaType): VariableExplanation[] {
           adjustable: false,
         },
       ];
+    case "cross_entropy":
+      return [
+        { symbol: "y_i", role: "target", meaning: "True label distribution or one-hot target for class i.", adjustable: false },
+        { symbol: "p_i", role: "prediction", meaning: "Predicted probability assigned to class i.", adjustable: true, defaultValue: 0.8, min: 0.01, max: 1, step: 0.01 },
+        { symbol: "\\log", role: "penalty", meaning: "Turns low true-class probability into a large loss.", adjustable: false },
+      ];
+    case "bayes_rule":
+      return [
+        { symbol: "P(A|B)", role: "posterior", meaning: "Updated belief in A after seeing evidence B.", adjustable: false },
+        { symbol: "P(A)", role: "prior", meaning: "Belief in A before seeing evidence B.", adjustable: true, defaultValue: 0.2, min: 0.01, max: 0.99, step: 0.01 },
+        { symbol: "P(B|A)", role: "likelihood", meaning: "How likely evidence B is if A is true.", adjustable: true, defaultValue: 0.9, min: 0.01, max: 0.99, step: 0.01 },
+        { symbol: "P(B)", role: "evidence", meaning: "Normalizing probability of observing B.", adjustable: true, defaultValue: 0.3, min: 0.01, max: 0.99, step: 0.01 },
+      ];
+    case "combination":
+      return [
+        { symbol: "n", role: "total items", meaning: "Number of available items.", adjustable: true, defaultValue: 5, min: 1, max: 12, step: 1 },
+        { symbol: "k", role: "chosen items", meaning: "Number of items selected without order.", adjustable: true, defaultValue: 2, min: 0, max: 12, step: 1 },
+        { symbol: "!", role: "factorial", meaning: "Product of positive integers down to 1.", adjustable: false },
+      ];
+    case "set_identity":
+      return [
+        { symbol: "A", role: "set", meaning: "A collection of distinct objects.", adjustable: false },
+        { symbol: "B", role: "set", meaning: "Another collection that may overlap A.", adjustable: false },
+        { symbol: "\\cup", role: "union", meaning: "Objects in A or B.", adjustable: false },
+        { symbol: "\\cap", role: "intersection", meaning: "Objects in both A and B.", adjustable: false },
+      ];
+    case "graph_degree":
+      return [
+        { symbol: "G=(V,E)", role: "graph", meaning: "A graph made of vertices V and edges E.", adjustable: false },
+        { symbol: "v", role: "vertex", meaning: "One node in the graph.", adjustable: false },
+        { symbol: "\\deg(v)", role: "degree", meaning: "Number of edges touching vertex v.", adjustable: false },
+        { symbol: "|E|", role: "edge count", meaning: "Total number of graph edges.", adjustable: false },
+      ];
     default:
       return [];
   }

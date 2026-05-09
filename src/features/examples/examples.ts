@@ -42,6 +42,51 @@ export const examples: FormulaExample[] = [
     domain: "ai_ml",
     selectedType: "gradient_descent",
   },
+  {
+    id: "cross-entropy",
+    title: "Cross Entropy Loss",
+    summary: "Penalize predicted probabilities that disagree with the true label.",
+    latex: "L = -\\sum_i y_i \\log p_i",
+    context: "Classification loss paired with softmax probabilities.",
+    domain: "ai_ml",
+    selectedType: "cross_entropy",
+  },
+  {
+    id: "bayes-rule",
+    title: "Bayes' Rule",
+    summary: "Update a prior belief after observing evidence.",
+    latex: "P(A \\mid B) = \\frac{P(B \\mid A)P(A)}{P(B)}",
+    context: "A probability identity for posterior inference.",
+    domain: "math_stats",
+    selectedType: "bayes_rule",
+  },
+  {
+    id: "combination",
+    title: "Combination Count",
+    summary: "Count unordered ways to choose k items from n.",
+    latex: "\\binom{n}{k} = \\frac{n!}{k!(n-k)!}",
+    context: "A basic formula in combinatorics and discrete math.",
+    domain: "discrete_math",
+    selectedType: "combination",
+  },
+  {
+    id: "set-union",
+    title: "Inclusion-Exclusion for Two Sets",
+    summary: "Count a union without double-counting the overlap.",
+    latex: "|A \\cup B| = |A| + |B| - |A \\cap B|",
+    context: "A set identity from discrete mathematics.",
+    domain: "discrete_math",
+    selectedType: "set_identity",
+  },
+  {
+    id: "graph-degree",
+    title: "Graph Degree Sum",
+    summary: "Every undirected edge contributes two degree counts.",
+    latex: "\\sum_{v \\in V} \\deg(v) = 2|E|",
+    context: "The handshaking lemma in graph theory.",
+    domain: "discrete_math",
+    selectedType: "graph_degree",
+  },
 ];
 
 export const formulaTypeLabels: Record<FormulaType | "auto", string> = {
@@ -50,6 +95,11 @@ export const formulaTypeLabels: Record<FormulaType | "auto", string> = {
   softmax: "Softmax",
   sigmoid: "Sigmoid",
   gradient_descent: "Gradient Descent",
+  cross_entropy: "Cross Entropy",
+  bayes_rule: "Bayes' Rule",
+  combination: "Combination",
+  set_identity: "Set Identity",
+  graph_degree: "Graph Degree",
   unknown: "Unknown",
 };
 

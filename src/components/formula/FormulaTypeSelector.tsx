@@ -1,7 +1,18 @@
 import type { FormulaType } from "../../schemas/formula";
-import { formulaTypeLabels } from "../../features/examples/examples";
+import { formulaTypeLabelsByLanguage, useI18nStore } from "../../i18n";
 
-const options: Array<FormulaType | "auto"> = ["auto", "weighted_loss", "softmax", "sigmoid", "gradient_descent"];
+const options: Array<FormulaType | "auto"> = [
+  "auto",
+  "weighted_loss",
+  "softmax",
+  "sigmoid",
+  "gradient_descent",
+  "cross_entropy",
+  "bayes_rule",
+  "combination",
+  "set_identity",
+  "graph_degree",
+];
 
 interface FormulaTypeSelectorProps {
   value: FormulaType | "auto";
@@ -9,6 +20,9 @@ interface FormulaTypeSelectorProps {
 }
 
 export function FormulaTypeSelector({ value, onChange }: FormulaTypeSelectorProps) {
+  const language = useI18nStore((state) => state.language);
+  const labels = formulaTypeLabelsByLanguage[language];
+
   return (
     <div className="grid grid-cols-2 gap-2">
       {options.map((option) => (
@@ -16,13 +30,13 @@ export function FormulaTypeSelector({ value, onChange }: FormulaTypeSelectorProp
           key={option}
           className={`min-h-10 rounded-lg border px-3 text-left text-sm font-semibold transition ${
             value === option
-              ? "border-lens-primary bg-indigo-50 text-lens-primary"
-              : "border-lens-line bg-white text-lens-muted hover:border-slate-300 hover:text-lens-ink"
+              ? "border-lens-primary bg-indigo-50 text-lens-primary dark:bg-indigo-500/15"
+              : "border-lens-line bg-white text-lens-muted hover:border-slate-300 hover:text-lens-ink dark:bg-slate-950 dark:hover:border-slate-600"
           }`}
           onClick={() => onChange(option)}
           type="button"
         >
-          {formulaTypeLabels[option]}
+          {labels[option]}
         </button>
       ))}
     </div>

@@ -6,6 +6,9 @@ export function exportMarkdown(analysis: FormulaAnalysis): string {
     .join("\n");
   const boundaries = analysis.boundaryCases.map((item) => `- **${item.title}:** ${item.description}`).join("\n");
   const pitfalls = analysis.pitfalls.map((item) => `- ${item}`).join("\n");
+  const steps = analysis.computationSteps.map((step, index) => `${index + 1}. **${step.title}:** ${step.description}`).join("\n");
+  const related = analysis.relatedFormulas.map((item) => `- **${item.title}** (${item.relation}): ${item.latex}`).join("\n");
+  const prerequisites = analysis.prerequisites.map((item) => `- **${item.title}** (${item.level}): ${item.reason}`).join("\n");
 
   return `# FormulaForge Card
 
@@ -22,6 +25,26 @@ ${analysis.detectedType}
 ## Intuition
 
 ${analysis.plainExplanation}
+
+## Beginner Explanation
+
+${analysis.beginnerExplanation}
+
+## Analogy
+
+${analysis.analogy}
+
+## Computation Steps
+
+${steps}
+
+## Toy Example
+
+${analysis.toyExample.description}
+
+${analysis.toyExample.steps.map((step) => `- ${step}`).join("\n")}
+
+**Result:** ${analysis.toyExample.result}
 
 ## Strict Explanation
 
@@ -40,5 +63,13 @@ ${boundaries}
 ## Pitfalls
 
 ${pitfalls}
+
+## Learning Path
+
+${prerequisites}
+
+## Related Formulas
+
+${related}
 `;
 }

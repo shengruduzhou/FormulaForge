@@ -3,6 +3,9 @@ export type VisualizationKind =
   | "softmax_distribution"
   | "sigmoid_curve"
   | "gradient_descent_trajectory"
+  | "venn_diagram"
+  | "combination_counter"
+  | "graph_degree_diagram"
   | "none";
 
 export interface VisualizationParameter {

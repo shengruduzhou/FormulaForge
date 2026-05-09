@@ -24,12 +24,14 @@ export function GradientDescentViz() {
   return (
     <div className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
       <div className="grid content-start gap-4">
-        <Slider label="Learning rate η" value={learningRate} min={0.01} max={0.8} step={0.01} onChange={setLearningRate} />
+        <Slider label="Learning rate eta" value={learningRate} min={0.01} max={0.8} step={0.01} onChange={setLearningRate} />
         <Slider label="Initial x" value={initialX} min={-4} max={4} step={0.1} onChange={setInitialX} />
         <Slider label="Initial y" value={initialY} min={-4} max={4} step={0.1} onChange={setInitialY} />
         <div
           className={`rounded-lg border p-4 ${
-            diverging ? "border-amber-200 bg-amber-50 text-amber-900" : "border-emerald-200 bg-emerald-50 text-emerald-900"
+            diverging
+              ? "border-amber-200 bg-amber-50 text-amber-900 dark:bg-amber-950/30 dark:text-amber-200"
+              : "border-emerald-200 bg-emerald-50 text-emerald-900 dark:bg-emerald-950/30 dark:text-emerald-200"
           }`}
         >
           <p className="text-sm font-semibold">{diverging ? "Overshoot warning" : "Trajectory status"}</p>
@@ -40,7 +42,7 @@ export function GradientDescentViz() {
           </p>
         </div>
       </div>
-      <div className="rounded-lg border border-lens-line bg-slate-50 p-4">
+      <div className="rounded-lg border border-lens-line bg-slate-50 p-4 dark:bg-slate-900">
         <svg className="h-80 w-full" viewBox="0 0 340 340" role="img" aria-label="Gradient descent contour trajectory">
           {[130, 100, 70, 40].map((radius, index) => (
             <ellipse
