@@ -29,6 +29,9 @@ export function detectFormulaTypeWithConfidence(latex: string, context = ""): Fo
     softmax: 0,
     sigmoid: 0,
     gradient_descent: 0,
+    scaled_dot_product_attention: 0,
+    layer_norm: 0,
+    adam_optimizer: 0,
     cross_entropy: 0,
     bayes_rule: 0,
     combination: 0,
@@ -37,6 +40,9 @@ export function detectFormulaTypeWithConfidence(latex: string, context = ""): Fo
     graph_degree: 0,
     logic_quantifier: 0,
     recurrence_relation: 0,
+    pigeonhole_principle: 0,
+    de_morgan_law: 0,
+    modular_congruence: 0,
     unknown: 0,
   };
 
@@ -55,6 +61,18 @@ export function detectFormulaTypeWithConfidence(latex: string, context = ""): Fo
   if (has(value, /\\theta|theta/) && has(value, /\\eta|eta|learning rate/) && has(value, /\\nabla|gradient/)) {
     addScore(scores, "gradient_descent", 7);
   }
+  if (
+    has(value, /attention|query|key|value|qk|q\s*k|\\sqrt\{?d_k\}?|d_k/) &&
+    (has(value, /softmax/) || (features.hasMatrix && features.hasFraction))
+  ) {
+    addScore(scores, "scaled_dot_product_attention", 9);
+  }
+  if (has(value, /layer\s*norm|layernorm|\\mathrm\{?ln\}?|\\operatorname\{?ln\}?|\\gamma|\\beta/) && has(value, /\\mu|mean|\\sigma|variance|\\epsilon|\\varepsilon/)) {
+    addScore(scores, "layer_norm", 8);
+  }
+  if (has(value, /\\hat\{?m|\\hat\{?v|adam|\\beta_1|\\beta_2|moment/) || (has(value, /\\theta/) && has(value, /\\sqrt\{?\\hat\{?v/) && has(value, /\\epsilon|\\varepsilon/))) {
+    addScore(scores, "adam_optimizer", 8);
+  }
   if (features.hasLog && features.hasSummation && has(value, /h\(p,q\)|cross.?entropy|y_i|p_i|q_i|-\s*\\sum/)) {
     addScore(scores, "cross_entropy", 7);
   }
@@ -70,20 +88,31 @@ export function detectFormulaTypeWithConfidence(latex: string, context = ""): Fo
   if (features.hasSetOperator || has(value, /\\cup|\\cap|inclusion-exclusion|venn|set identity/)) {
     addScore(scores, "set_identity", 7);
   }
+  if (has(value, /de.?morgan|\\overline\{?a\\s*\\cup\\s*b|\\bar\{?a|complement/) && has(value, /\\cap|\\cup/)) {
+    addScore(scores, "de_morgan_law", 9);
+  }
   if (features.hasGraphOperator || has(value, /graph|vertex|edge|handshaking|degree|\\deg/)) {
     addScore(scores, "graph_degree", 7);
   }
-  if (features.hasQuantifier || has(value, /\\forall|\\exists|∀|∃|truth table|predicate|implication|\\land|\\lor|\\neg/)) {
+  if (features.hasQuantifier || has(value, /\\forall|\\exists|truth table|predicate|implication|\\land|\\lor|\\neg/)) {
     addScore(scores, "logic_quantifier", 8);
   }
   if (features.hasRecurrence || has(value, /recurrence|fibonacci|a_\{?n\}?=a_\{?n-1\}?/)) {
     addScore(scores, "recurrence_relation", 7);
+  }
+  if (has(value, /pigeonhole|ceil|\\lceil|\\left\\lceil|n\+1.*n boxes|boxes|holes/) && has(value, /\\lceil|ceil|n|m/)) {
+    addScore(scores, "pigeonhole_principle", 8);
+  }
+  if (features.hasModularArithmetic || has(value, /\\equiv|\\pmod|\\mod|congruence|modulo|pmod/)) {
+    addScore(scores, "modular_congruence", 8);
   }
 
   if (features.hasFraction) {
     addScore(scores, "softmax", 0.5);
     addScore(scores, "bayes_rule", 0.5);
     addScore(scores, "sigmoid", 0.5);
+    addScore(scores, "scaled_dot_product_attention", 0.25);
+    addScore(scores, "layer_norm", 0.25);
   }
   if (features.hasSummation) {
     addScore(scores, "cross_entropy", 0.5);

@@ -3,10 +3,10 @@ import type { ButtonHTMLAttributes, ReactNode } from "react";
 type Variant = "primary" | "secondary" | "ghost" | "danger";
 
 const variants: Record<Variant, string> = {
-  primary: "bg-lens-primary text-white shadow-sm hover:bg-indigo-700",
+  primary: "bg-lens-primary text-white shadow-sm hover:bg-indigo-700 active:bg-indigo-800",
   secondary:
-    "border border-lens-line bg-white text-lens-ink hover:border-slate-300 hover:bg-slate-50 dark:bg-slate-950 dark:hover:bg-slate-900",
-  ghost: "text-lens-muted hover:bg-slate-100 hover:text-lens-ink dark:hover:bg-slate-900",
+    "border border-lens-line bg-white text-lens-ink hover:border-indigo-200 hover:bg-indigo-50/60 dark:bg-slate-950 dark:hover:border-indigo-500/40 dark:hover:bg-indigo-500/10",
+  ghost: "text-lens-muted hover:bg-indigo-50/70 hover:text-lens-ink dark:hover:bg-indigo-500/10",
   danger: "border border-red-200 bg-white text-lens-danger hover:bg-red-50 dark:bg-slate-950 dark:hover:bg-red-950/30",
 };
 

@@ -3,6 +3,9 @@ export type FormulaType =
   | "softmax"
   | "sigmoid"
   | "gradient_descent"
+  | "scaled_dot_product_attention"
+  | "layer_norm"
+  | "adam_optimizer"
   | "cross_entropy"
   | "bayes_rule"
   | "combination"
@@ -11,6 +14,9 @@ export type FormulaType =
   | "graph_degree"
   | "logic_quantifier"
   | "recurrence_relation"
+  | "pigeonhole_principle"
+  | "de_morgan_law"
+  | "modular_congruence"
   | "unknown";
 
 export type Domain = "ai_ml" | "math_stats" | "discrete_math" | "physics" | "engineering" | "general";
@@ -54,6 +60,10 @@ export interface FormulaFeatureSet {
   hasExponent: boolean;
   hasLog: boolean;
   hasFactorial: boolean;
+  hasMatrix: boolean;
+  hasNorm: boolean;
+  hasProduct: boolean;
+  hasModularArithmetic: boolean;
   hasSetOperator: boolean;
   hasGraphOperator: boolean;
   hasQuantifier: boolean;

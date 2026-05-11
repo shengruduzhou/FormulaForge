@@ -15,6 +15,11 @@ export function analyzeFormula(input: FormulaInput): FormulaAnalysis {
   const blueprint = getFormulaBlueprint(detectedType);
   const inferredDomain = inferDomain(detectedType, input.domain, detection.features);
   const visualizationSpec = createVisualizationSpec(detectedType);
+  const detectionScores = Object.entries(detection.scores)
+    .filter(([type, score]) => type !== "unknown" && score > 0)
+    .map(([type, score]) => ({ type: type as FormulaAnalysis["detectedType"], score }))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 6);
 
   return {
     id: input.id,
@@ -22,6 +27,7 @@ export function analyzeFormula(input: FormulaInput): FormulaAnalysis {
     detectedType,
     formulaFamily: detectedType,
     confidence: input.selectedType === "auto" ? detection.confidence : 0.99,
+    detectionScores,
     renderedLatex: normalizedLatex,
     normalizedLatex,
     inferredDomain,

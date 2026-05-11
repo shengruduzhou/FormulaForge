@@ -2,6 +2,7 @@ import { localizeVisualizationSpec, useI18nStore } from "../../i18n";
 import type { VisualizationSpec } from "../../schemas/visualization";
 import { Card, CardBody, CardHeader } from "../ui/Card";
 import { CombinationViz } from "./CombinationViz";
+import { ConceptViz } from "./ConceptViz";
 import { GradientDescentViz } from "./GradientDescentViz";
 import { GraphDegreeViz } from "./GraphDegreeViz";
 import { ProbabilityTreeViz } from "./ProbabilityTreeViz";
@@ -34,6 +35,12 @@ export function VisualizationRenderer({ spec }: { spec: VisualizationSpec }) {
         {spec.kind === "truth_table" && <TruthTableViz />}
         {spec.kind === "probability_tree" && !isSoftmaxTree && <ProbabilityTreeViz />}
         {spec.kind === "recurrence_tree" && <RecurrenceTreeViz />}
+        {(spec.kind === "attention_matrix" ||
+          spec.kind === "normalization_vector" ||
+          spec.kind === "optimizer_moments" ||
+          spec.kind === "pigeonhole_grid" ||
+          spec.kind === "de_morgan_sets" ||
+          spec.kind === "modular_clock") && <ConceptViz kind={spec.kind} />}
         {spec.kind === "none" && (
           <p className="text-sm text-lens-muted">{language === "zh" ? "当前还没有可用的交互可视化。" : "No interactive visualization is available yet."}</p>
         )}

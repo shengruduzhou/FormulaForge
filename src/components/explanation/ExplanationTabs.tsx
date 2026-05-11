@@ -19,7 +19,7 @@ export function ExplanationTabs({ analysis }: { analysis: FormulaAnalysis }) {
   return (
     <Card>
       <CardHeader>
-        <h2 className="text-base font-semibold text-lens-ink">{text.explanation}</h2>
+        <h2 className="academic-title text-xl font-semibold text-lens-ink">{text.explanation}</h2>
       </CardHeader>
       <CardBody>
         <Tabs

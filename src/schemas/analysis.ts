@@ -15,12 +15,18 @@ import type {
 } from "./formula";
 import type { VisualizationSpec } from "./visualization";
 
+export interface DetectionScore {
+  type: FormulaType;
+  score: number;
+}
+
 export interface FormulaAnalysis {
   id: string;
   input: FormulaInput;
   detectedType: FormulaType;
   formulaFamily: FormulaType;
   confidence: number;
+  detectionScores: DetectionScore[];
   renderedLatex: string;
   normalizedLatex: string;
   inferredDomain: FormulaInput["domain"];

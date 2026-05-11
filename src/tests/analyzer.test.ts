@@ -36,6 +36,17 @@ describe("detectFormulaType", () => {
     expect(detectFormulaType("\\forall x\\in A,\\exists y\\in B: R(x,y)")).toBe("logic_quantifier");
     expect(detectFormulaType("a_n = a_{n-1}+a_{n-2}", "recurrence")).toBe("recurrence_relation");
   });
+
+  it("detects deep-learning and additional discrete math formulas", () => {
+    expect(detectFormulaType("\\mathrm{Attention}(Q,K,V)=\\mathrm{softmax}\\left(\\frac{QK^T}{\\sqrt{d_k}}\\right)V")).toBe(
+      "scaled_dot_product_attention",
+    );
+    expect(detectFormulaType("\\mathrm{LN}(x)=\\gamma\\frac{x-\\mu}{\\sqrt{\\sigma^2+\\epsilon}}+\\beta", "layer norm")).toBe("layer_norm");
+    expect(detectFormulaType("\\theta_t=\\theta_{t-1}-\\eta\\frac{\\hat m_t}{\\sqrt{\\hat v_t}+\\epsilon}", "Adam optimizer")).toBe("adam_optimizer");
+    expect(detectFormulaType("\\max_i |B_i| \\ge \\left\\lceil \\frac{n}{m} \\right\\rceil", "pigeonhole boxes")).toBe("pigeonhole_principle");
+    expect(detectFormulaType("\\overline{A\\cup B}=\\bar A\\cap\\bar B", "De Morgan set identity")).toBe("de_morgan_law");
+    expect(detectFormulaType("a\\equiv b\\pmod n \\iff n\\mid(a-b)", "modular congruence")).toBe("modular_congruence");
+  });
 });
 
 describe("analyzeFormula", () => {
@@ -69,6 +80,9 @@ describe("analyzeFormula", () => {
       "\\sum_{v\\in V}\\deg(v)=2|E|",
       "P(A|B)=\\frac{P(B|A)P(A)}{P(B)}",
       "\\forall x\\in A,\\exists y\\in B: R(x,y)",
+      "\\mathrm{Attention}(Q,K,V)=\\mathrm{softmax}\\left(\\frac{QK^T}{\\sqrt{d_k}}\\right)V",
+      "\\mathrm{LN}(x)=\\gamma\\frac{x-\\mu}{\\sqrt{\\sigma^2+\\epsilon}}+\\beta",
+      "a\\equiv b\\pmod n \\iff n\\mid(a-b)",
     ];
 
     const results = formulas.map((latex) =>
@@ -89,6 +103,9 @@ describe("analyzeFormula", () => {
       "graph_degree",
       "bayes_rule",
       "logic_quantifier",
+      "scaled_dot_product_attention",
+      "layer_norm",
+      "modular_congruence",
     ]);
     expect(new Set(results.map((result) => result.oneLineIntuition)).size).toBe(formulas.length);
   });

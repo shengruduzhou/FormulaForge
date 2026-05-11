@@ -30,7 +30,7 @@ export function FormulaPreview({ analysis }: FormulaPreviewProps) {
     <Card>
       <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-base font-semibold text-lens-ink">{language === "zh" ? "公式预览" : "Formula Preview"}</h2>
+          <h2 className="academic-title text-xl font-semibold text-lens-ink">{language === "zh" ? "公式预览" : "Formula Preview"}</h2>
           <p className="mt-1 text-sm text-lens-muted">
             {language === "zh" ? "使用 KaTeX 渲染，并在解析前做规范化处理。" : "Rendered with KaTeX and normalized before analysis."}
           </p>
@@ -41,7 +41,7 @@ export function FormulaPreview({ analysis }: FormulaPreviewProps) {
         </div>
       </CardHeader>
       <CardBody className="grid gap-4">
-        <div className="formula-scroll overflow-x-auto rounded-lg border border-lens-line bg-slate-50 px-4 py-5 text-center dark:bg-slate-900">
+        <div className="formula-scroll overflow-x-auto rounded-lg border border-lens-line bg-[var(--lens-accent-soft)] px-4 py-6 text-center dark:bg-slate-900">
           {error ? (
             <p className="text-sm text-lens-danger">{error}</p>
           ) : (

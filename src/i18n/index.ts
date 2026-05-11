@@ -117,6 +117,9 @@ export const formulaTypeLabelsByLanguage: Record<Language, Record<FormulaType | 
     softmax: "Softmax",
     sigmoid: "Sigmoid",
     gradient_descent: "Gradient Descent",
+    scaled_dot_product_attention: "Scaled Dot-Product Attention",
+    layer_norm: "LayerNorm",
+    adam_optimizer: "Adam Optimizer",
     cross_entropy: "Cross Entropy",
     bayes_rule: "Bayes' Rule",
     combination: "Combination",
@@ -125,6 +128,9 @@ export const formulaTypeLabelsByLanguage: Record<Language, Record<FormulaType | 
     graph_degree: "Graph Degree",
     logic_quantifier: "Logic / Quantifier",
     recurrence_relation: "Recurrence Relation",
+    pigeonhole_principle: "Pigeonhole Principle",
+    de_morgan_law: "De Morgan's Law",
+    modular_congruence: "Modular Congruence",
     unknown: "Unknown",
   },
   zh: {
@@ -133,6 +139,9 @@ export const formulaTypeLabelsByLanguage: Record<Language, Record<FormulaType | 
     softmax: "Softmax 归一化",
     sigmoid: "Sigmoid 函数",
     gradient_descent: "梯度下降",
+    scaled_dot_product_attention: "缩放点积注意力",
+    layer_norm: "层归一化",
+    adam_optimizer: "Adam 优化器",
     cross_entropy: "交叉熵",
     bayes_rule: "贝叶斯公式",
     combination: "组合数",
@@ -141,6 +150,9 @@ export const formulaTypeLabelsByLanguage: Record<Language, Record<FormulaType | 
     graph_degree: "图论度数",
     logic_quantifier: "逻辑量词",
     recurrence_relation: "递推关系",
+    pigeonhole_principle: "抽屉原理",
+    de_morgan_law: "德摩根律",
+    modular_congruence: "模同余",
     unknown: "未识别",
   },
 };
@@ -176,7 +188,7 @@ interface AnalysisCopy {
   pitfalls: string[];
 }
 
-const zhAnalysisCopy: Record<FormulaType, AnalysisCopy> = {
+const zhAnalysisCopy: Partial<Record<FormulaType, AnalysisCopy>> = {
   weighted_loss: {
     plainExplanation:
       "加权损失把多个训练目标合成一个总目标。每个 lambda 像一个旋钮，调大它会让优化器更重视对应损失，但损失本身的数值尺度也同样重要。",
@@ -617,7 +629,7 @@ const zhStructureText: Record<string, string> = {
   "No template matched": "暂无匹配模板",
 };
 
-const zhVisualizationText: Record<VisualizationKind, { title: string; description: string }> = {
+const zhVisualizationText: Partial<Record<VisualizationKind, { title: string; description: string }>> = {
   venn: {
     title: "集合关系图",
     description: "用 Venn 图理解并集、交集和重复计数。",
@@ -701,7 +713,8 @@ export const weightedLossVizText = {
 
 export function localizeFormulaAnalysis(analysis: FormulaAnalysis, language: Language): FormulaAnalysis {
   if (language === "en") return analysis;
-  const copy = zhAnalysisCopy[analysis.detectedType] ?? zhAnalysisCopy.unknown;
+  const copy = zhAnalysisCopy[analysis.detectedType];
+  if (!copy) return analysis;
 
   return {
     ...analysis,
@@ -730,6 +743,7 @@ export function localizeStructure(structure: FormulaStructureNode, language: Lan
 export function localizeVisualizationSpec(spec: VisualizationSpec, language: Language): VisualizationSpec {
   if (language === "en") return spec;
   const copy = zhVisualizationText[spec.kind];
+  if (!copy) return spec;
   return {
     ...spec,
     title: copy.title,

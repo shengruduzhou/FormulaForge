@@ -17,14 +17,14 @@ export function Tabs({ tabs, activeTab, onChange }: TabsProps) {
 
   return (
     <div>
-      <div className="flex flex-wrap gap-1 border-b border-lens-line">
+      <div className="flex flex-wrap gap-1 rounded-lg border border-lens-line bg-slate-50 p-1 dark:bg-slate-900">
         {tabs.map((tab) => (
           <button
             key={tab.id}
-            className={`min-h-10 rounded-t-lg px-3 text-sm font-semibold transition ${
+            className={`min-h-9 rounded-md px-3 text-sm font-semibold transition ${
               activeTab === tab.id
-                ? "border-b-2 border-lens-primary text-lens-primary"
-                : "text-lens-muted hover:bg-slate-50 hover:text-lens-ink dark:hover:bg-slate-900"
+                ? "bg-white text-lens-primary shadow-sm dark:bg-slate-950"
+                : "text-lens-muted hover:bg-white/70 hover:text-lens-ink dark:hover:bg-slate-950/70"
             }`}
             onClick={() => onChange(tab.id)}
             type="button"

@@ -48,6 +48,42 @@ export function buildStructure(type: FormulaType): FormulaStructureNode {
           { id: "update", label: "Move downhill", latex: "\\theta_t - \\eta\\nabla L", role: "Next parameter" },
         ],
       };
+    case "scaled_dot_product_attention":
+      return {
+        id: "attention",
+        label: "Scaled Dot-Product Attention",
+        role: "Transformer read operation",
+        children: [
+          { id: "scores", label: "Query-key scores", latex: "QK^T", role: "Pairwise relevance" },
+          { id: "scale", label: "Dimension scaling", latex: "\\sqrt{d_k}", role: "Numerical stabilizer" },
+          { id: "weights", label: "Attention weights", latex: "\\mathrm{softmax}(QK^T/\\sqrt{d_k})", role: "Row-wise distribution" },
+          { id: "values", label: "Value mixture", latex: "\\mathrm{softmax}(...)V", role: "Context output" },
+        ],
+      };
+    case "layer_norm":
+      return {
+        id: "layer-norm",
+        label: "Layer Normalization",
+        role: "Activation rescaling",
+        children: [
+          { id: "stats", label: "Feature statistics", latex: "\\mu,\\sigma^2", role: "Per-token mean and variance" },
+          { id: "center", label: "Center activations", latex: "x-\\mu", role: "Remove local offset" },
+          { id: "scale", label: "Normalize scale", latex: "\\sqrt{\\sigma^2+\\epsilon}", role: "Safe denominator" },
+          { id: "affine", label: "Learned affine", latex: "\\gamma\\hat{x}+\\beta", role: "Recover useful scale" },
+        ],
+      };
+    case "adam_optimizer":
+      return {
+        id: "adam",
+        label: "Adam Optimizer",
+        role: "Adaptive update",
+        children: [
+          { id: "grad", label: "Current gradient", latex: "g_t", role: "Local slope" },
+          { id: "moments", label: "Moment estimates", latex: "m_t,v_t", role: "Smoothed direction and scale" },
+          { id: "correct", label: "Bias correction", latex: "\\hat m_t,\\hat v_t", role: "Early-step adjustment" },
+          { id: "step", label: "Adaptive step", latex: "\\eta\\hat m_t/(\\sqrt{\\hat v_t}+\\epsilon)", role: "Parameter update size" },
+        ],
+      };
     case "cross_entropy":
       return {
         id: "cross-entropy",
@@ -140,6 +176,42 @@ export function buildStructure(type: FormulaType): FormulaStructureNode {
           { id: "base", label: "Base cases", role: "Known starting values" },
           { id: "previous", label: "Previous terms", latex: "a_{n-1}, a_{n-2}", role: "Dependencies" },
           { id: "current", label: "Current term", latex: "a_n", role: "Computed value" },
+        ],
+      };
+    case "pigeonhole_principle":
+      return {
+        id: "pigeonhole",
+        label: "Pigeonhole Principle",
+        role: "Counting guarantee",
+        children: [
+          { id: "objects", label: "Objects", latex: "n", role: "Items to distribute" },
+          { id: "boxes", label: "Boxes", latex: "m", role: "Categories or containers" },
+          { id: "average", label: "Average load", latex: "n/m", role: "Baseline crowding" },
+          { id: "ceiling", label: "Guaranteed box", latex: "\\lceil n/m\\rceil", role: "At least this many items" },
+        ],
+      };
+    case "de_morgan_law":
+      return {
+        id: "de-morgan",
+        label: "De Morgan Rewrite",
+        role: "Negation transform",
+        children: [
+          { id: "group", label: "Grouped expression", latex: "A\\cup B", role: "Union or logical or" },
+          { id: "negate", label: "Outer negation", latex: "\\overline{A\\cup B}", role: "Complement of the whole group" },
+          { id: "flip", label: "Flip operation", latex: "\\cap", role: "Union becomes intersection" },
+          { id: "parts", label: "Negate each part", latex: "\\bar A\\cap\\bar B", role: "Complement each operand" },
+        ],
+      };
+    case "modular_congruence":
+      return {
+        id: "modular-congruence",
+        label: "Modular Congruence",
+        role: "Remainder relation",
+        children: [
+          { id: "left", label: "First integer", latex: "a", role: "Left value" },
+          { id: "right", label: "Second integer", latex: "b", role: "Right value" },
+          { id: "modulus", label: "Modulus", latex: "n", role: "Cycle length" },
+          { id: "difference", label: "Divisibility check", latex: "n\\mid(a-b)", role: "Same remainder test" },
         ],
       };
     default:
