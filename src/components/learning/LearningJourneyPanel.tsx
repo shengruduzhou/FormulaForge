@@ -1,5 +1,5 @@
 import { Check, ChevronDown, CircleHelp, GraduationCap, Lightbulb, RotateCcw } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { buildLearningJourney } from "../../features/learning/buildLearningJourney";
 import { useI18nStore } from "../../i18n";
 import type { DeepFormulaAnalysis } from "../../schemas/deepAnalysis";
@@ -16,6 +16,12 @@ export function LearningJourneyPanel({ analysis }: LearningJourneyPanelProps) {
   const [completed, setCompleted] = useState<Set<string>>(new Set());
   const [openStage, setOpenStage] = useState<string>("orientation");
   const [revealedAnswers, setRevealedAnswers] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    setCompleted(new Set());
+    setOpenStage("orientation");
+    setRevealedAnswers(new Set());
+  }, [analysis?.createdAt]);
 
   if (!analysis || !journey) return null;
 
