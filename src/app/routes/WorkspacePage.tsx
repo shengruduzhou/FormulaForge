@@ -5,6 +5,8 @@ import { ExplanationTabs } from "../../components/explanation/ExplanationTabs";
 import { ParserDiagnostics } from "../../components/explanation/ParserDiagnostics";
 import { FormulaInputPanel } from "../../components/formula/FormulaInputPanel";
 import { FormulaPreview } from "../../components/formula/FormulaPreview";
+import { FormulaSkillPanel } from "../../components/learning/FormulaSkillPanel";
+import { LearningJourneyPanel } from "../../components/learning/LearningJourneyPanel";
 import { StructureDiagram } from "../../components/structure/StructureDiagram";
 import { VisualizationRenderer } from "../../components/visualization/VisualizationRenderer";
 import { useI18nStore } from "../../i18n";
@@ -30,18 +32,12 @@ export function WorkspacePage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const example = params.get("example");
-    if (example) {
-      loadExample(example);
-    }
+    if (example) loadExample(example);
   }, [loadExample]);
 
   useEffect(() => {
     if (!input.latex.trim()) return;
-
-    const timer = window.setTimeout(() => {
-      analyze();
-    }, 650);
-
+    const timer = window.setTimeout(analyze, 650);
     return () => window.clearTimeout(timer);
   }, [input, analyze]);
 
@@ -65,6 +61,8 @@ export function WorkspacePage() {
       <section className="grid min-w-0 gap-5">
         <FormulaPreview analysis={analysis} />
         <DeepAnalysisPanel analysis={deepAnalysis} status={deepStatus} error={deepError} />
+        <LearningJourneyPanel analysis={deepAnalysis} />
+        <FormulaSkillPanel analysis={deepAnalysis} />
         <ParserDiagnostics analysis={analysis} />
         <ExplanationTabs analysis={analysis} />
         <StructureDiagram structure={analysis.structure} />
