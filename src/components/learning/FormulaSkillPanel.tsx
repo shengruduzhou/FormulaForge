@@ -1,4 +1,4 @@
-import { Check, Clipboard, Download, FileText, WandSparkles } from "lucide-react";
+import { Check, Clipboard, Download, FileText, TriangleAlert, WandSparkles } from "lucide-react";
 import { useMemo, useState } from "react";
 import { buildFormulaExplainerSkill, buildFormulaFollowUpPrompt } from "../../features/skills/buildFormulaSkill";
 import { useI18nStore } from "../../i18n";
@@ -13,8 +13,21 @@ interface FormulaSkillPanelProps {
 type CopyTarget = "skill" | "prompt" | null;
 
 async function copyText(text: string) {
-  if (!navigator.clipboard) throw new Error("Clipboard API is unavailable.");
-  await navigator.clipboard.writeText(text);
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.setAttribute("readonly", "");
+  textarea.style.position = "fixed";
+  textarea.style.opacity = "0";
+  document.body.appendChild(textarea);
+  textarea.select();
+  const copied = document.execCommand("copy");
+  document.body.removeChild(textarea);
+  if (!copied) throw new Error("Copy is unavailable in this browser.");
 }
 
 function downloadMarkdown(filename: string, content: string) {
@@ -30,6 +43,7 @@ function downloadMarkdown(filename: string, content: string) {
 export function FormulaSkillPanel({ analysis }: FormulaSkillPanelProps) {
   const language = useI18nStore((state) => state.language);
   const [copied, setCopied] = useState<CopyTarget>(null);
+  const [copyError, setCopyError] = useState<string | null>(null);
   const skill = useMemo(() => (analysis ? buildFormulaExplainerSkill(analysis, language) : ""), [analysis, language]);
   const prompt = useMemo(() => (analysis ? buildFormulaFollowUpPrompt(analysis, language) : ""), [analysis, language]);
 
@@ -37,9 +51,14 @@ export function FormulaSkillPanel({ analysis }: FormulaSkillPanelProps) {
   const zh = language === "zh";
 
   const handleCopy = async (target: Exclude<CopyTarget, null>, value: string) => {
-    await copyText(value);
-    setCopied(target);
-    window.setTimeout(() => setCopied(null), 1600);
+    setCopyError(null);
+    try {
+      await copyText(value);
+      setCopied(target);
+      window.setTimeout(() => setCopied(null), 1600);
+    } catch (error) {
+      setCopyError(error instanceof Error ? error.message : (zh ? "复制失败。" : "Copy failed."));
+    }
   };
 
   return (
@@ -90,6 +109,12 @@ export function FormulaSkillPanel({ analysis }: FormulaSkillPanelProps) {
             {copied === "prompt" ? (zh ? "已复制" : "Copied") : (zh ? "复制 Prompt" : "Copy prompt")}
           </Button>
         </article>
+        {copyError && (
+          <p className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-xs leading-5 text-red-700 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300 lg:col-span-2">
+            <TriangleAlert className="mt-0.5 shrink-0" size={15} />
+            {copyError}
+          </p>
+        )}
       </CardBody>
     </Card>
   );
