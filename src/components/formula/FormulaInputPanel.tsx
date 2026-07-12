@@ -6,6 +6,7 @@ import type { Domain, FormulaInput } from "../../schemas/formula";
 import { Button } from "../ui/Button";
 import { Card, CardBody, CardHeader } from "../ui/Card";
 import { Textarea } from "../ui/Textarea";
+import { FormulaContextCoach } from "./FormulaContextCoach";
 import { FormulaTypeSelector } from "./FormulaTypeSelector";
 import { ImageFormulaUploader } from "./ImageFormulaUploader";
 
@@ -53,8 +54,8 @@ export function FormulaInputPanel({
         </div>
         <p className="mt-2 text-xs leading-5 text-lens-muted">
           {language === "zh"
-            ? "本地解析用于快速预览；LLM 深度解释用于论文级参数、推导、假设和图表分析。"
-            : "Local parsing provides instant preview; LLM analysis adds paper-level parameter, derivation, assumption, and chart explanations."}
+            ? "先提供公式和论文上下文，再由系统按理解顺序构建解释，而不是只给出参数灵敏度。"
+            : "Provide the formula and its paper context, then let the system build an explanation in learning order rather than only describing parameter sensitivity."}
         </p>
       </CardHeader>
       <CardBody className="grid gap-5">
@@ -85,7 +86,7 @@ export function FormulaInputPanel({
             {text.context}
           </label>
           <Textarea
-            className="min-h-28 font-sans"
+            className="min-h-32 font-sans"
             id="context"
             value={value.context}
             onChange={(event) => onChange({ ...value, context: event.target.value })}
@@ -94,6 +95,14 @@ export function FormulaInputPanel({
                 ? "粘贴公式前后的论文段落、符号定义、图注或任务背景。上下文越完整，参数解释越可靠。"
                 : "Paste the surrounding paper paragraph, symbol definitions, caption, or task background. More context improves parameter interpretation."
             }
+          />
+          <FormulaContextCoach
+            context={value.context ?? ""}
+            language={language}
+            onApplyTemplate={(template) => onChange({
+              ...value,
+              context: value.context?.trim() ? `${value.context.trim()}\n\n${template}` : template,
+            })}
           />
         </div>
 
@@ -131,11 +140,11 @@ export function FormulaInputPanel({
             {isDeepLoading ? <Loader2 className="animate-spin" size={16} /> : <Sparkles size={16} />}
             {isDeepLoading
               ? language === "zh"
-                ? "正在深度解释..."
-                : "Building deep explanation..."
+                ? "正在构建理解路径..."
+                : "Building understanding path..."
               : language === "zh"
-                ? "LLM 深度解释"
-                : "Deep LLM explanation"}
+                ? "开始深度理解"
+                : "Build deep understanding"}
           </Button>
           <Button variant="secondary" onClick={onAnalyze} disabled={!value.latex.trim()}>
             <Play size={16} />
