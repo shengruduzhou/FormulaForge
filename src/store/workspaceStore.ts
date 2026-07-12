@@ -6,27 +6,6 @@ import type { FormulaAnalysis } from "../schemas/analysis";
 import type { DeepAnalysisImage, DeepAnalysisStatus, DeepFormulaAnalysis } from "../schemas/deepAnalysis";
 import type { FormulaInput } from "../schemas/formula";
 
-const defaultInput: FormulaInput = {
-  id: "manual-formula",
-  latex: examples[0].latex,
-  context: examples[0].context,
-  domain: "ai_ml",
-  selectedType: "auto",
-};
-
-const emptyDeepState = {
-  deepAnalysis: null,
-  deepStatus: "idle",
-  deepError: null,
-} satisfies Pick<WorkspaceState, "deepAnalysis" | "deepStatus" | "deepError">;
-
-let deepRequestSequence = 0;
-
-function invalidateDeepRequests() {
-  deepRequestSequence += 1;
-  return emptyDeepState;
-}
-
 interface WorkspaceState {
   input: FormulaInput;
   analysis: FormulaAnalysis;
@@ -40,6 +19,27 @@ interface WorkspaceState {
   analyzeDeep: (language: "en" | "zh") => Promise<void>;
   loadExample: (id: string) => void;
   clear: () => void;
+}
+
+const defaultInput: FormulaInput = {
+  id: "manual-formula",
+  latex: examples[0].latex,
+  context: examples[0].context,
+  domain: "ai_ml",
+  selectedType: "auto",
+};
+
+const emptyDeepState: Pick<WorkspaceState, "deepAnalysis" | "deepStatus" | "deepError"> = {
+  deepAnalysis: null,
+  deepStatus: "idle",
+  deepError: null,
+};
+
+let deepRequestSequence = 0;
+
+function invalidateDeepRequests() {
+  deepRequestSequence += 1;
+  return emptyDeepState;
 }
 
 export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
