@@ -3,11 +3,7 @@ import { analyzeFormula } from "../features/analyzer/analyzeFormula";
 import { analyzeFormulaDeep } from "../features/analyzer/analyzeFormulaDeep";
 import { examples } from "../features/examples/examples";
 import type { FormulaAnalysis } from "../schemas/analysis";
-import type {
-  DeepAnalysisImage,
-  DeepAnalysisStatus,
-  DeepFormulaAnalysis,
-} from "../schemas/deepAnalysis";
+import type { DeepAnalysisImage, DeepAnalysisStatus, DeepFormulaAnalysis } from "../schemas/deepAnalysis";
 import type { FormulaInput } from "../schemas/formula";
 
 const defaultInput: FormulaInput = {
@@ -18,7 +14,18 @@ const defaultInput: FormulaInput = {
   selectedType: "auto",
 };
 
+const emptyDeepState = {
+  deepAnalysis: null,
+  deepStatus: "idle",
+  deepError: null,
+} satisfies Pick<WorkspaceState, "deepAnalysis" | "deepStatus" | "deepError">;
+
 let deepRequestSequence = 0;
+
+function invalidateDeepRequests() {
+  deepRequestSequence += 1;
+  return emptyDeepState;
+}
 
 interface WorkspaceState {
   input: FormulaInput;
@@ -39,27 +46,9 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
   input: defaultInput,
   analysis: analyzeFormula(defaultInput),
   image: null,
-  deepAnalysis: null,
-  deepStatus: "idle",
-  deepError: null,
-  setInput: (input) => {
-    deepRequestSequence += 1;
-    set({
-      input,
-      deepAnalysis: null,
-      deepStatus: "idle",
-      deepError: null,
-    });
-  },
-  setImage: (image) => {
-    deepRequestSequence += 1;
-    set({
-      image,
-      deepAnalysis: null,
-      deepStatus: "idle",
-      deepError: null,
-    });
-  },
+  ...emptyDeepState,
+  setInput: (input) => set({ input, ...invalidateDeepRequests() }),
+  setImage: (image) => set({ image, ...invalidateDeepRequests() }),
   analyze: () => set({ analysis: analyzeFormula(get().input) }),
   analyzeDeep: async (language) => {
     const { input, image } = get();
@@ -97,9 +86,8 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
     }
   },
   loadExample: (id) => {
-    deepRequestSequence += 1;
     const example = examples.find((item) => item.id === id) ?? examples[0];
-    const input = {
+    const input: FormulaInput = {
       id: example.id,
       latex: example.latex,
       context: example.context,
@@ -110,13 +98,10 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
       input,
       analysis: analyzeFormula(input),
       image: null,
-      deepAnalysis: null,
-      deepStatus: "idle",
-      deepError: null,
+      ...invalidateDeepRequests(),
     });
   },
   clear: () => {
-    deepRequestSequence += 1;
     const input: FormulaInput = {
       id: "manual-formula",
       latex: "",
@@ -128,9 +113,7 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
       input,
       analysis: analyzeFormula(input),
       image: null,
-      deepAnalysis: null,
-      deepStatus: "idle",
-      deepError: null,
+      ...invalidateDeepRequests(),
     });
   },
 }));
