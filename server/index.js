@@ -1,6 +1,7 @@
 import { createServer } from "node:http";
-import { analyzeFormulaRequest } from "./services/formulaAnalyzer.js";
 import { extractFormulaCandidates } from "./services/documentExtractor.js";
+import { analyzeFormulaRequest } from "./services/formulaAnalyzer.js";
+import { analyzeFormulaWithLlm, getLlmStatus } from "./services/llmFormulaAnalyzer.js";
 import { recognizeFormulaImage } from "./services/ocrService.js";
 
 const PORT = Number.parseInt(process.env.PORT ?? "8787", 10);
@@ -60,15 +61,35 @@ async function route(request, response) {
     sendJson(response, 200, {
       status: "ok",
       service: "FormulaForge API",
-      version: "0.1.0",
-      capabilities: ["formula-analysis", "document-formula-extraction", "mathpix-ocr", "local-pix2tex-ocr"],
+      version: "0.2.0",
+      capabilities: [
+        "formula-analysis",
+        "llm-deep-formula-analysis",
+        "multimodal-formula-analysis",
+        "document-formula-extraction",
+        "mathpix-ocr",
+        "local-pix2tex-ocr",
+      ],
+      llm: getLlmStatus(),
     });
+    return;
+  }
+
+  if (request.method === "GET" && url.pathname === "/api/llm/status") {
+    sendJson(response, 200, getLlmStatus());
     return;
   }
 
   if (request.method === "POST" && url.pathname === "/api/formula/analyze") {
     const body = await readBody(request);
     sendJson(response, 200, analyzeFormulaRequest(body));
+    return;
+  }
+
+  if (request.method === "POST" && url.pathname === "/api/formula/explain") {
+    const body = await readBody(request);
+    const result = await analyzeFormulaWithLlm(body);
+    sendJson(response, result.status, result.payload);
     return;
   }
 
