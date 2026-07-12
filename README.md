@@ -1,57 +1,80 @@
 # FormulaForge
 
-FormulaForge is a formula parser and beginner-friendly formula explanation workspace. It turns LaTeX formulas, paper snippets, and optional OCR image input into structured explanations, symbol breakdowns, reading order, toy examples, related formulas, and interactive visualizations.
+FormulaForge is a formula-analysis workspace for academic papers. It accepts LaTeX, plain-text formulas, surrounding paper context, and formula screenshots, then produces two complementary outputs:
 
-## Features
+1. **Local parser analysis** for fast, deterministic previews, formula-family detection, syntax signals, and existing interactive visualizations.
+2. **LLM deep analysis** for arbitrary paper formulas, detailed parameter definitions, term interactions, derivation logic, assumptions, applications, numerical stability, validation checks, and context-aware visual explanations.
 
-- Modular formula analyzer:
-  - LaTeX normalization
-  - feature extraction
-  - formula family detection
-  - domain inference
-  - variable extraction
-  - symbol breakdown
-  - reading order
-  - structured explanation generation
-- Beginner-friendly explanation layers:
-  - one-line intuition
-  - elementary-math explanation
-  - analogy
-  - formal explanation
-  - variable and symbol breakdown
-  - step-by-step logic
-  - toy numerical example
-  - boundary cases and pitfalls
-  - prerequisite concepts
-  - same-domain related formulas
-- Discrete math visual support:
-  - Venn diagrams
-  - counting grids
-  - graph SVG diagrams
-  - truth tables
-  - recurrence trees
-- OCR image input:
-  - upload
-  - paste
-  - drag and drop
-  - backend Mathpix adapter
-  - optional local pix2tex-compatible adapter
-  - safe fallback when OCR is not configured
+The local parser remains available when no LLM is configured, so the application degrades safely instead of becoming unusable.
 
-## Supported Formula Families
+## What the deep analyzer explains
 
-- Weighted loss
-- Sigmoid
-- Softmax
-- Cross entropy
-- Bayes' rule
-- Combinations and permutations
-- Set identities and inclusion-exclusion
-- Graph degree / handshaking lemma
-- Logic quantifiers
-- Recurrence relations
+The LLM report is structured rather than returned as an unformatted chat message. It covers:
 
-## Local Development
+- formula name, category, domain, purpose, and output interpretation;
+- every parameter or symbol:
+  - rigorous definition;
+  - role in the formula;
+  - scalar/vector/matrix/tensor type;
+  - expected shape or dimensionality;
+  - physical units or dimensionless status;
+  - valid domain/range;
+  - observed, fixed, hyperparameter, or learned status;
+  - dependencies and interactions;
+  - effect when increased or decreased, with assumptions stated;
+  - edge cases and an example value;
+  - confidence when the paper context is incomplete;
+- decomposition of important formula terms;
+- reading order and practical computation procedure;
+- derivation steps and assumptions used by each step;
+- typical applications and related concepts;
+- limitations, numerical stability, and consistency checks;
+- uncertainty notes that distinguish evidence from inference;
+- a chart or flow diagram selected according to what can be justified from the formula.
+
+## Input modes
+
+- Paste LaTeX.
+- Paste a plain-text equation.
+- Paste surrounding paper paragraphs or symbol definitions.
+- Upload, drag, or paste a PNG/JPEG/WebP screenshot.
+- Use OCR to recover editable LaTeX.
+- Send the original screenshot directly to a multimodal LLM even when OCR is not configured.
+
+## Architecture
+
+```text
+formula/image/context
+        |
+        +--> local parser --------------------> instant deterministic preview
+        |
+        +--> OCR adapter ---------------------> editable LaTeX (optional)
+        |
+        +--> LLM adapter
+               |-- OpenAI Responses API
+               |-- OpenAI-compatible Chat Completions
+               |-- strict JSON Schema output
+               |-- output normalization and validation
+                        |
+                        +--> deep research report + generic chart/flow renderer
+```
+
+API keys stay on the backend. The browser calls FormulaForge's own `/api/formula/explain` route and never receives the provider key.
+
+## Existing local capabilities
+
+- LaTeX normalization and syntax checks
+- formula-family detection and confidence scores
+- domain inference
+- symbol and variable extraction
+- reading order and structured explanations
+- toy numerical examples
+- boundary cases, pitfalls, and prerequisites
+- formula structure diagrams
+- existing interactive visualizations for common formula families
+- Mathpix OCR and optional local pix2tex-compatible OCR
+
+## Local development
 
 Install dependencies:
 
@@ -59,16 +82,22 @@ Install dependencies:
 npm install
 ```
 
-Run the frontend:
+Copy the backend environment template:
 
 ```bash
-npm run dev
+cp server/.env.example server/.env
 ```
 
-Run the backend API:
+Start the backend:
 
 ```bash
 npm run server
+```
+
+Start the frontend in another terminal:
+
+```bash
+npm run dev
 ```
 
 The frontend runs on `http://127.0.0.1:5173` and proxies `/api` to `http://127.0.0.1:8787`.
@@ -76,44 +105,64 @@ The frontend runs on `http://127.0.0.1:5173` and proxies `/api` to `http://127.0
 Quality checks:
 
 ```bash
+npm run test:server
 npm test
 npm run build
+npm run lint
 ```
 
-## Backend API
+## LLM configuration
 
-Compatible endpoints:
+### OpenAI Responses API
 
-- `GET /api/health`
-- `POST /api/formula/analyze`
-- `POST /api/document/extract-formulas`
-- `POST /api/ocr/image`
-
-Formula analysis example:
+Set either `LLM_API_KEY` or `OPENAI_API_KEY`:
 
 ```bash
-curl -X POST http://127.0.0.1:8787/api/formula/analyze \
-  -H "Content-Type: application/json" \
-  -d "{\"latex\":\"p_i=\\\\frac{e^{z_i}}{\\\\sum_j e^{z_j}}\"}"
+LLM_API_KEY=your_api_key
+LLM_PROVIDER=openai
+LLM_BASE_URL=https://api.openai.com/v1
+LLM_MODEL=gpt-5.6-luna
+LLM_API_STYLE=responses
 ```
 
-OCR example:
+`responses` is the default API style. It supports text, image input, and strict structured output.
+
+### OpenAI-compatible provider
+
+For a provider exposing a compatible Responses endpoint:
 
 ```bash
-curl -X POST http://127.0.0.1:8787/api/ocr/image \
-  -H "Content-Type: application/json" \
-  -d "{\"image\":\"data:image/png;base64,...\"}"
+LLM_API_KEY=your_provider_key
+LLM_PROVIDER=my-provider
+LLM_BASE_URL=https://provider.example/v1
+LLM_MODEL=provider-model-name
+LLM_API_STYLE=responses
 ```
 
-When OCR is not configured, the route returns a useful `503` JSON response and manual formula input continues to work.
-
-## OCR Setup
-
-Copy the backend env example:
+For a provider that only supports Chat Completions:
 
 ```bash
-cp server/.env.example server/.env
+LLM_API_KEY=your_provider_key
+LLM_PROVIDER=my-provider
+LLM_BASE_URL=https://provider.example/v1
+LLM_MODEL=provider-model-name
+LLM_API_STYLE=chat_completions
 ```
+
+Some providers do not support strict JSON Schema. Disable strict mode only when required:
+
+```bash
+LLM_STRICT_JSON=false
+```
+
+Additional controls:
+
+```bash
+LLM_TIMEOUT_MS=90000
+LLM_MAX_OUTPUT_TOKENS=8000
+```
+
+## OCR configuration
 
 Mathpix:
 
@@ -128,42 +177,127 @@ Optional local pix2tex-compatible service:
 OCR_SERVICE_URL=http://127.0.0.1:8501/predict
 ```
 
-If `OCR_SERVICE_URL` is set, FormulaForge tries the local service first. Otherwise it uses Mathpix when both Mathpix variables are present.
+If OCR is unavailable, the uploaded image remains available to the multimodal LLM route.
+
+## Backend API
+
+### Health and LLM status
+
+- `GET /api/health`
+- `GET /api/llm/status`
+
+```bash
+curl http://127.0.0.1:8787/api/llm/status
+```
+
+The status response reports whether the backend is configured, plus provider, model, API style, and image-input support. It never returns the API key.
+
+### Local deterministic analysis
+
+- `POST /api/formula/analyze`
+
+```bash
+curl -X POST http://127.0.0.1:8787/api/formula/analyze \
+  -H "Content-Type: application/json" \
+  -d '{
+    "latex": "p_i=\\frac{e^{z_i}}{\\sum_j e^{z_j}}",
+    "context": "Class probability normalization"
+  }'
+```
+
+### LLM deep formula analysis
+
+- `POST /api/formula/explain`
+
+Text/LaTeX example:
+
+```bash
+curl -X POST http://127.0.0.1:8787/api/formula/explain \
+  -H "Content-Type: application/json" \
+  -d '{
+    "latex": "L = L_{task} + \\lambda L_{reg}",
+    "context": "The paper uses L_reg to constrain the learned representation.",
+    "domain": "ai_ml",
+    "selectedType": "auto",
+    "language": "zh",
+    "depth": "research"
+  }'
+```
+
+Multimodal example:
+
+```bash
+curl -X POST http://127.0.0.1:8787/api/formula/explain \
+  -H "Content-Type: application/json" \
+  -d '{
+    "image": "data:image/png;base64,...",
+    "context": "Equation 4 from the method section.",
+    "domain": "ai_ml",
+    "language": "en",
+    "depth": "research"
+  }'
+```
+
+The response shape is:
+
+```json
+{
+  "analysis": {
+    "source": "llm",
+    "provider": "openai",
+    "model": "...",
+    "formulaTitle": "...",
+    "parameters": [],
+    "derivation": [],
+    "visualization": {}
+  }
+}
+```
+
+### Document and OCR endpoints
+
+- `POST /api/document/extract-formulas`
+- `POST /api/ocr/image`
+
+## Reliability and safety behavior
+
+- Request body size is limited by `MAX_BODY_BYTES`.
+- LLM calls use an abort timeout.
+- Provider errors are converted into stable JSON errors.
+- Strict JSON Schema is requested where supported.
+- Returned JSON is normalized before reaching the UI.
+- Confidence and uncertainty are explicit fields.
+- The prompt prohibits inventing paper-specific definitions when context is absent.
+- Quantitative charts must carry a disclaimer when values are illustrative.
+- Existing local analysis remains available during LLM or OCR outages.
 
 ## Deployment
 
-### Vercel Frontend
+### Vercel frontend
 
-1. Import the repository into Vercel.
-2. Use the Vite defaults:
-   - build command: `npm run build`
-   - output directory: `dist`
-3. Set a rewrite or environment-specific API base if your backend is hosted separately.
+1. Import the repository.
+2. Build with `npm run build`.
+3. Use `dist` as the output directory.
+4. Route `/api/*` to the deployed Node backend.
 
-For a separate backend host, point `/api/*` to that backend through Vercel rewrites or configure your deployment proxy.
+Do not place LLM or OCR secrets in Vite client-side environment variables.
 
-### Render / Railway Backend
+### Render / Railway backend
 
-Deploy the repository as a Node service:
-
-```bash
-npm install
-npm run server
-```
-
-Recommended service settings:
+Recommended settings:
 
 - start command: `npm run server`
-- port: `8787` or platform-provided `PORT`
+- port: `8787` or the platform-provided `PORT`
 - environment variables:
-  - `MATHPIX_APP_ID`
-  - `MATHPIX_APP_KEY`
-  - `OCR_SERVICE_URL` if using local OCR
-  - `CORS_ORIGIN` set to your frontend origin
+  - `LLM_API_KEY` or `OPENAI_API_KEY`
+  - `LLM_PROVIDER`
+  - `LLM_BASE_URL`
+  - `LLM_MODEL`
+  - `LLM_API_STYLE`
+  - optional OCR variables
+  - `CORS_ORIGIN` set to the frontend origin
 
 ### VPS + Nginx + PM2
-
-Install and build:
 
 ```bash
 git clone https://github.com/shengruduzhou/FormulaForge.git
@@ -175,45 +309,34 @@ pm2 start server/index.js --name formulaforge-api
 pm2 save
 ```
 
-Example Nginx server:
+Example Nginx API proxy:
 
 ```nginx
-server {
-  server_name formulaforge.example.com;
-
-  root /var/www/FormulaForge/dist;
-  index index.html;
-
-  location / {
-    try_files $uri /index.html;
-  }
-
-  location /api/ {
-    proxy_pass http://127.0.0.1:8787/api/;
-    proxy_http_version 1.1;
-    proxy_set_header Host $host;
-    proxy_set_header X-Real-IP $remote_addr;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_set_header X-Forwarded-Proto $scheme;
-  }
+location /api/ {
+  proxy_pass http://127.0.0.1:8787/api/;
+  proxy_http_version 1.1;
+  proxy_set_header Host $host;
+  proxy_set_header X-Real-IP $remote_addr;
+  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+  proxy_set_header X-Forwarded-Proto $scheme;
 }
 ```
 
-Then configure TLS with Certbot or your preferred certificate manager.
-
-## Project Structure
+## Project structure
 
 ```text
 src/
-  app/routes/                 page routes
-  components/formula/          input, OCR, formula preview
-  components/explanation/      explanation tabs and cards
-  components/visualization/    SVG and interactive renderers
-  features/analyzer/           modular formula analyzer
-  features/visualization/      visualization spec builders
-  schemas/                     TypeScript domain models
-  store/                       workspace state
+  app/routes/                       page routes
+  components/formula/               text/image input and OCR
+  components/explanation/           local and LLM explanation views
+  components/visualization/         existing interactive renderers
+  features/analyzer/                local parser and deep-analysis client
+  schemas/                          TypeScript domain models
+  store/                            workspace and async LLM state
 server/
-  services/                    API formula, document, and OCR services
-  index.js                     Node HTTP API entrypoint
+  services/formulaAnalyzer.js       local deterministic API analyzer
+  services/llmFormulaAnalyzer.js    provider adapter and structured output
+  services/ocrService.js            OCR adapters
+  tests/                            backend unit tests
+  index.js                          Node HTTP API entrypoint
 ```
