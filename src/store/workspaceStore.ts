@@ -42,20 +42,24 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
   deepAnalysis: null,
   deepStatus: "idle",
   deepError: null,
-  setInput: (input) =>
+  setInput: (input) => {
+    deepRequestSequence += 1;
     set({
       input,
       deepAnalysis: null,
       deepStatus: "idle",
       deepError: null,
-    }),
-  setImage: (image) =>
+    });
+  },
+  setImage: (image) => {
+    deepRequestSequence += 1;
     set({
       image,
       deepAnalysis: null,
       deepStatus: "idle",
       deepError: null,
-    }),
+    });
+  },
   analyze: () => set({ analysis: analyzeFormula(get().input) }),
   analyzeDeep: async (language) => {
     const { input, image } = get();
